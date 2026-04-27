@@ -12,14 +12,30 @@ The backend will expose FastAPI endpoints for health checks, material and suppli
 
 ## Backend Setup
 
-Backend implementation is planned under `backend/`.
-
 ```bash
 cd backend
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --reload
+```
+
+The SQLite database is created at `backend/storage/veritrace.db` (path is
+controlled by `DATABASE_PATH` in the root `.env`). On first startup the app
+auto-creates the schema and seeds it from `backend/data/*.json`. To re-run
+seeding manually:
+
+```bash
+python backend/seed.py
+```
+
+Sanity-check endpoints once the server is running:
+
+```bash
+curl http://localhost:8000/api/health
+curl http://localhost:8000/api/materials
+curl http://localhost:8000/api/materials/MAT-PCM-001
+curl http://localhost:8000/api/suppliers
 ```
 
 ## Frontend Setup
