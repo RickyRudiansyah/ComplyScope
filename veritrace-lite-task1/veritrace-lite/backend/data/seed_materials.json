@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "description": "Synthetic master material list for VeriTrace Lite demo. Mirrors a typical pharma material master record (ERP-style) without using any real company data.",
+  "materials": [
+    {
+      "material_code": "MAT-PCM-001",
+      "material_name": "Paracetamol API",
+      "category": "API",
+      "min_shelf_life_days": 180,
+      "storage_requirement": "Keep dry, below 25°C",
+      "active": true,
+      "notes": "Demo material. Required quality tests are defined in seed_specs.json by material_code."
+    }
+  ]
+}

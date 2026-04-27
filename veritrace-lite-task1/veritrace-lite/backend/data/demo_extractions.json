@@ -1,0 +1,286 @@
+{
+  "schema_version": "1.0",
+  "description": "Cached extracted fields for VeriTrace Lite demo scenarios. Used as fallback when Azure Document Intelligence + parser are not invoked. This file contains ONLY the structured fields the parser would output. Final findings and decisions are NOT stored here; they are computed at runtime by the validator + risk engine using seed_materials.json, seed_suppliers.json, and seed_specs.json.",
+  "scenarios": [
+    {
+      "scenario_id": "valid",
+      "title": "Valid COA and Label",
+      "description": "All fields match. Supplier approved. All required tests present. All test results within specification.",
+      "extracted_fields": {
+        "coa": {
+          "document_type": "Certificate of Analysis",
+          "coa_no": "COA-PCM-2026-001",
+          "issue_date": "2026-04-20",
+          "page": "1 of 1",
+          "product_name": "Paracetamol API",
+          "material_name": "Paracetamol API",
+          "material_code": "MAT-PCM-001",
+          "category": "API",
+          "supplier": "PT Sumber Farma Kimia",
+          "manufacturer": "PT Sumber Farma Kimia Manufacturing Site",
+          "batch_no": "PCM-2026-001",
+          "mfg_date": "2026-01-15",
+          "expiry_date": "2027-03-31",
+          "quantity": "100 kg",
+          "storage_condition": "Keep dry, below 25°C",
+          "test_results": [
+            {
+              "parameter": "Appearance",
+              "method": "Visual",
+              "specification": "White crystalline powder",
+              "result": "White crystalline powder",
+              "unit": "-",
+              "status": "PASS"
+            },
+            {
+              "parameter": "Identification",
+              "method": "FTIR",
+              "specification": "Positive",
+              "result": "Positive",
+              "unit": "-",
+              "status": "PASS"
+            },
+            {
+              "parameter": "Assay",
+              "method": "HPLC",
+              "specification": "98.0 - 102.0",
+              "result": "99.4",
+              "unit": "%",
+              "status": "PASS"
+            },
+            {
+              "parameter": "Moisture",
+              "method": "LOD",
+              "specification": "<= 0.5",
+              "result": "0.21",
+              "unit": "%",
+              "status": "PASS"
+            }
+          ],
+          "conclusion": "The batch complies with the defined material specification.",
+          "authorized_by": "QA Authorized Person"
+        },
+        "label": {
+          "material_name": "Paracetamol API",
+          "material_code": "MAT-PCM-001",
+          "batch_no": "PCM-2026-001",
+          "supplier": "PT Sumber Farma Kimia",
+          "quantity": "100 kg",
+          "mfg_date": "2026-01-15",
+          "expiry_date": "2027-03-31",
+          "storage_condition": "Keep dry, below 25°C"
+        }
+      }
+    },
+    {
+      "scenario_id": "batch_mismatch",
+      "title": "Batch Number Mismatch Between COA and Label",
+      "description": "COA batch number differs from label batch number. All test results pass and supplier is approved. Validator should produce BATCH_MISMATCH finding.",
+      "extracted_fields": {
+        "coa": {
+          "document_type": "Certificate of Analysis",
+          "coa_no": "COA-PCM-2026-002",
+          "issue_date": "2026-04-22",
+          "page": "1 of 1",
+          "product_name": "Paracetamol API",
+          "material_name": "Paracetamol API",
+          "material_code": "MAT-PCM-001",
+          "category": "API",
+          "supplier": "PT Sumber Farma Kimia",
+          "manufacturer": "PT Sumber Farma Kimia Manufacturing Site",
+          "batch_no": "PCM-2026-999",
+          "mfg_date": "2026-01-15",
+          "expiry_date": "2027-03-31",
+          "quantity": "100 kg",
+          "storage_condition": "Keep dry, below 25°C",
+          "test_results": [
+            {
+              "parameter": "Appearance",
+              "method": "Visual",
+              "specification": "White crystalline powder",
+              "result": "White crystalline powder",
+              "unit": "-",
+              "status": "PASS"
+            },
+            {
+              "parameter": "Identification",
+              "method": "FTIR",
+              "specification": "Positive",
+              "result": "Positive",
+              "unit": "-",
+              "status": "PASS"
+            },
+            {
+              "parameter": "Assay",
+              "method": "HPLC",
+              "specification": "98.0 - 102.0",
+              "result": "99.1",
+              "unit": "%",
+              "status": "PASS"
+            },
+            {
+              "parameter": "Moisture",
+              "method": "LOD",
+              "specification": "<= 0.5",
+              "result": "0.24",
+              "unit": "%",
+              "status": "PASS"
+            }
+          ],
+          "conclusion": "The batch complies with the defined material specification.",
+          "authorized_by": "QA Authorized Person"
+        },
+        "label": {
+          "material_name": "Paracetamol API",
+          "material_code": "MAT-PCM-001",
+          "batch_no": "PCM-2026-001",
+          "supplier": "PT Sumber Farma Kimia",
+          "quantity": "100 kg",
+          "mfg_date": "2026-01-15",
+          "expiry_date": "2027-03-31",
+          "storage_condition": "Keep dry, below 25°C"
+        }
+      }
+    },
+    {
+      "scenario_id": "test_result_out_of_spec",
+      "title": "Test Result Out Of Specification (Assay Below Lower Limit)",
+      "description": "All required tests present but Assay result (97.2 %) is below the lower acceptance limit (98.0 %). Validator should produce TEST_RESULT_OUT_OF_SPEC with parameter = Assay. The parameter is dynamic; the validator must not be hardcoded to Assay.",
+      "extracted_fields": {
+        "coa": {
+          "document_type": "Certificate of Analysis",
+          "coa_no": "COA-PCM-2026-003",
+          "issue_date": "2026-04-23",
+          "page": "1 of 1",
+          "product_name": "Paracetamol API",
+          "material_name": "Paracetamol API",
+          "material_code": "MAT-PCM-001",
+          "category": "API",
+          "supplier": "PT Sumber Farma Kimia",
+          "manufacturer": "PT Sumber Farma Kimia Manufacturing Site",
+          "batch_no": "PCM-2026-003",
+          "mfg_date": "2026-01-20",
+          "expiry_date": "2027-04-30",
+          "quantity": "100 kg",
+          "storage_condition": "Keep dry, below 25°C",
+          "test_results": [
+            {
+              "parameter": "Appearance",
+              "method": "Visual",
+              "specification": "White crystalline powder",
+              "result": "White crystalline powder",
+              "unit": "-",
+              "status": "PASS"
+            },
+            {
+              "parameter": "Identification",
+              "method": "FTIR",
+              "specification": "Positive",
+              "result": "Positive",
+              "unit": "-",
+              "status": "PASS"
+            },
+            {
+              "parameter": "Assay",
+              "method": "HPLC",
+              "specification": "98.0 - 102.0",
+              "result": "97.2",
+              "unit": "%",
+              "status": "FAIL"
+            },
+            {
+              "parameter": "Moisture",
+              "method": "LOD",
+              "specification": "<= 0.5",
+              "result": "0.27",
+              "unit": "%",
+              "status": "PASS"
+            }
+          ],
+          "conclusion": "The batch does not comply with the defined material specification. One or more test results are outside the acceptance criteria.",
+          "authorized_by": "QA Authorized Person"
+        },
+        "label": {
+          "material_name": "Paracetamol API",
+          "material_code": "MAT-PCM-001",
+          "batch_no": "PCM-2026-003",
+          "supplier": "PT Sumber Farma Kimia",
+          "quantity": "100 kg",
+          "mfg_date": "2026-01-20",
+          "expiry_date": "2027-04-30",
+          "storage_condition": "Keep dry, below 25°C"
+        }
+      }
+    },
+    {
+      "scenario_id": "supplier_not_approved",
+      "title": "Supplier Not Approved For Material",
+      "description": "COA and label fields are internally consistent and all test results pass, but the supplier is not on the approved list for this material. Validator should produce SUPPLIER_NOT_APPROVED finding.",
+      "extracted_fields": {
+        "coa": {
+          "document_type": "Certificate of Analysis",
+          "coa_no": "COA-GCT-2026-014",
+          "issue_date": "2026-04-18",
+          "page": "1 of 1",
+          "product_name": "Paracetamol API",
+          "material_name": "Paracetamol API",
+          "material_code": "MAT-PCM-001",
+          "category": "API",
+          "supplier": "PT Global Chemical Trading",
+          "manufacturer": "PT Global Chemical Trading Manufacturing Site",
+          "batch_no": "GCT-2026-014",
+          "mfg_date": "2026-01-10",
+          "expiry_date": "2027-02-28",
+          "quantity": "100 kg",
+          "storage_condition": "Keep dry, below 25°C",
+          "test_results": [
+            {
+              "parameter": "Appearance",
+              "method": "Visual",
+              "specification": "White crystalline powder",
+              "result": "White crystalline powder",
+              "unit": "-",
+              "status": "PASS"
+            },
+            {
+              "parameter": "Identification",
+              "method": "FTIR",
+              "specification": "Positive",
+              "result": "Positive",
+              "unit": "-",
+              "status": "PASS"
+            },
+            {
+              "parameter": "Assay",
+              "method": "HPLC",
+              "specification": "98.0 - 102.0",
+              "result": "99.0",
+              "unit": "%",
+              "status": "PASS"
+            },
+            {
+              "parameter": "Moisture",
+              "method": "LOD",
+              "specification": "<= 0.5",
+              "result": "0.30",
+              "unit": "%",
+              "status": "PASS"
+            }
+          ],
+          "conclusion": "The batch complies with the defined material specification.",
+          "authorized_by": "QA Authorized Person"
+        },
+        "label": {
+          "material_name": "Paracetamol API",
+          "material_code": "MAT-PCM-001",
+          "batch_no": "GCT-2026-014",
+          "supplier": "PT Global Chemical Trading",
+          "quantity": "100 kg",
+          "mfg_date": "2026-01-10",
+          "expiry_date": "2027-02-28",
+          "storage_condition": "Keep dry, below 25°C"
+        }
+      }
+    }
+  ]
+}
