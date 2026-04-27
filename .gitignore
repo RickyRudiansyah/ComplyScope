@@ -1,8 +1,13 @@
-# Buat .gitignore
-echo "venv/
+.env
 __pycache__/
 *.pyc
-.env.local
-*.zip
-.env
-" > .gitignore
+.venv/
+venv/
+node_modules/
+dist/
+.vite/
+backend/storage/*.db
+backend/storage/*.sqlite
+backend/storage/*.sqlite3
+*.log
+.DS_Store
