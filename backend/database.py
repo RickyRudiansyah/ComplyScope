@@ -1,10 +1,11 @@
 """SQLite connection helpers and schema initialization for VeriTrace Lite."""
 from __future__ import annotations
 
+import json
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Optional
 
 from backend.config import settings
 
@@ -61,7 +62,7 @@ SCHEMA_STATEMENTS: list[str] = [
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         analysis_id TEXT NOT NULL UNIQUE,
         decision TEXT NOT NULL,
-        risk_score REAL,
+        risk_score INTEGER,
         risk_level TEXT,
         material_code TEXT,
         material_name TEXT,
@@ -118,3 +119,44 @@ def is_empty() -> bool:
     with db_session() as conn:
         row = conn.execute("SELECT COUNT(*) AS c FROM materials").fetchone()
         return int(row["c"]) == 0
+
+
+def fetch_material(material_code: str) -> Optional[dict]:
+    with db_session() as conn:
+        row = conn.execute(
+            "SELECT material_code, material_name, category, min_shelf_life_days, "
+            "storage_requirement FROM materials WHERE material_code = ?",
+            (material_code,),
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def fetch_approved_suppliers(material_code: str) -> list[str]:
+    with db_session() as conn:
+        rows = conn.execute(
+            "SELECT supplier_name FROM material_suppliers "
+            "WHERE material_code = ? AND status = 'APPROVED' "
+            "ORDER BY supplier_name",
+            (material_code,),
+        ).fetchall()
+    return [r["supplier_name"] for r in rows]
+
+
+def fetch_material_specs(material_code: str) -> list[dict]:
+    with db_session() as conn:
+        rows = conn.execute(
+            "SELECT material_code, parameter, method, spec_type, spec_min, spec_max, "
+            "expected_text, unit, required, criticality, aliases_json "
+            "FROM material_specs WHERE material_code = ? ORDER BY id",
+            (material_code,),
+        ).fetchall()
+    out: list[dict] = []
+    for r in rows:
+        d = dict(r)
+        d["required"] = bool(d.get("required"))
+        try:
+            d["aliases"] = json.loads(d.get("aliases_json") or "[]")
+        except json.JSONDecodeError:
+            d["aliases"] = []
+        out.append(d)
+    return out
