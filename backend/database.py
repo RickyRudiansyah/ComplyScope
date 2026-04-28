@@ -142,6 +142,94 @@ def fetch_approved_suppliers(material_code: str) -> list[str]:
     return [r["supplier_name"] for r in rows]
 
 
+def insert_verification_log(
+    *,
+    analysis_id: str,
+    decision: str,
+    risk_score: int,
+    risk_level: str,
+    material_code: Optional[str],
+    material_name: Optional[str],
+    supplier: Optional[str],
+    extracted_fields: dict,
+    findings: list,
+    summary: str,
+    recommendation: str,
+    reviewer_note: str,
+    created_at: Optional[str] = None,
+) -> str:
+    """Insert one verification result and return its analysis_id."""
+    with db_session() as conn:
+        if created_at is None:
+            conn.execute(
+                """
+                INSERT INTO verification_logs
+                    (analysis_id, decision, risk_score, risk_level, material_code,
+                     material_name, supplier, extracted_json, findings_json,
+                     summary, recommendation, reviewer_note)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    analysis_id, decision, risk_score, risk_level,
+                    material_code, material_name, supplier,
+                    json.dumps(extracted_fields, ensure_ascii=False),
+                    json.dumps(findings, ensure_ascii=False),
+                    summary, recommendation, reviewer_note,
+                ),
+            )
+        else:
+            conn.execute(
+                """
+                INSERT INTO verification_logs
+                    (analysis_id, decision, risk_score, risk_level, material_code,
+                     material_name, supplier, extracted_json, findings_json,
+                     summary, recommendation, reviewer_note, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    analysis_id, decision, risk_score, risk_level,
+                    material_code, material_name, supplier,
+                    json.dumps(extracted_fields, ensure_ascii=False),
+                    json.dumps(findings, ensure_ascii=False),
+                    summary, recommendation, reviewer_note, created_at,
+                ),
+            )
+    return analysis_id
+
+
+def list_verification_logs() -> list[dict]:
+    with db_session() as conn:
+        rows = conn.execute(
+            "SELECT analysis_id, decision, risk_score, risk_level, material_code, "
+            "material_name, supplier, summary, created_at "
+            "FROM verification_logs ORDER BY id DESC"
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def fetch_verification_log(analysis_id: str) -> Optional[dict]:
+    with db_session() as conn:
+        row = conn.execute(
+            "SELECT analysis_id, decision, risk_score, risk_level, material_code, "
+            "material_name, supplier, extracted_json, findings_json, "
+            "summary, recommendation, reviewer_note, created_at "
+            "FROM verification_logs WHERE analysis_id = ?",
+            (analysis_id,),
+        ).fetchone()
+    if row is None:
+        return None
+    d = dict(row)
+    try:
+        d["extracted_fields"] = json.loads(d.pop("extracted_json") or "{}")
+    except json.JSONDecodeError:
+        d["extracted_fields"] = {}
+    try:
+        d["findings"] = json.loads(d.pop("findings_json") or "[]")
+    except json.JSONDecodeError:
+        d["findings"] = []
+    return d
+
+
 def fetch_material_specs(material_code: str) -> list[dict]:
     with db_session() as conn:
         rows = conn.execute(

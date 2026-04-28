@@ -38,8 +38,14 @@ def decide(findings: Iterable[Finding]) -> RiskResult:
         for f in findings_list
     )
 
+    risk_level = _level_for(score)
+    # If a CRITICAL out-of-spec forced REJECTED, the risk level must reflect that
+    # severity even when the additive score is still within the MEDIUM band.
+    if has_critical_oos:
+        risk_level = "HIGH"
+
     return RiskResult(
         decision=_decision_for(score, has_critical_oos),
         risk_score=score,
-        risk_level=_level_for(score),
+        risk_level=risk_level,
     )

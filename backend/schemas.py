@@ -68,3 +68,57 @@ class Explanation(BaseModel):
     summary: str
     recommendation: str
     reviewer_note: str
+
+
+class ApiFinding(BaseModel):
+    """Public finding shape. Maps internal Finding.code -> type."""
+
+    type: str
+    severity: str
+    score: int
+    message: str
+    parameter: Optional[str] = None
+    evidence: Dict[str, Any] = Field(default_factory=dict)
+
+    @classmethod
+    def from_finding(cls, f: "Finding") -> "ApiFinding":
+        return cls(
+            type=f.code,
+            severity=f.severity,
+            score=f.score,
+            message=f.message,
+            parameter=f.parameter,
+            evidence=f.evidence,
+        )
+
+
+class DemoScenario(BaseModel):
+    scenario_id: str
+    title: str
+    description: str
+
+
+class VerificationListItem(BaseModel):
+    analysis_id: str
+    decision: str
+    risk_score: int
+    risk_level: str
+    material_code: Optional[str] = None
+    material_name: Optional[str] = None
+    supplier: Optional[str] = None
+    summary: Optional[str] = None
+    created_at: str
+
+
+class VerificationResult(BaseModel):
+    analysis_id: str
+    decision: str
+    risk_score: int
+    risk_level: str
+    summary: str
+    extracted_fields: Dict[str, Any] = Field(default_factory=dict)
+    findings: List[ApiFinding] = Field(default_factory=list)
+    recommendation: str
+    reviewer_note: str
+    human_review_required: bool
+    created_at: str
