@@ -40,5 +40,7 @@ def get_verification(analysis_id: str) -> VerificationResult:
         recommendation=row.get("recommendation") or "",
         reviewer_note=row.get("reviewer_note") or "",
         human_review_required=_human_review_required(decision),
+        source=row.get("source") or "DEMO_SAMPLE",
+        scenario_id=row.get("scenario_id"),
         created_at=row.get("created_at") or "",
     )

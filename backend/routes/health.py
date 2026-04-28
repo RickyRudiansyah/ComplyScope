@@ -10,7 +10,7 @@ router = APIRouter()
 def health_check() -> HealthResponse:
     return HealthResponse(
         status="ok",
-        service="veritrace-lite",
+        service="veritrace",
         doc_intel_configured=settings.doc_intel_configured,
         azure_openai_configured=settings.azure_openai_configured,
     )

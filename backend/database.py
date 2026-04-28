@@ -1,4 +1,4 @@
-"""SQLite connection helpers and schema initialization for VeriTrace Lite."""
+"""SQLite connection helpers and schema initialization for VeriTrace."""
 from __future__ import annotations
 
 import json
@@ -72,10 +72,34 @@ SCHEMA_STATEMENTS: list[str] = [
         summary TEXT,
         recommendation TEXT,
         reviewer_note TEXT,
+        source TEXT NOT NULL DEFAULT 'DEMO_SAMPLE',
+        scenario_id TEXT,
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
     )
     """,
 ]
+
+
+# Idempotent column-level migrations for tables that pre-existed an
+# older schema. SQLite's CREATE TABLE IF NOT EXISTS does not add new
+# columns, so we backfill them here.
+_COLUMN_MIGRATIONS: dict[str, list[tuple[str, str]]] = {
+    "verification_logs": [
+        ("source", "TEXT NOT NULL DEFAULT 'DEMO_SAMPLE'"),
+        ("scenario_id", "TEXT"),
+    ],
+}
+
+
+def _apply_column_migrations(conn: sqlite3.Connection) -> None:
+    for table, columns in _COLUMN_MIGRATIONS.items():
+        existing = {
+            row["name"]
+            for row in conn.execute(f"PRAGMA table_info('{table}')").fetchall()
+        }
+        for name, decl in columns:
+            if name not in existing:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {decl}")
 
 
 def get_db_path() -> Path:
@@ -108,10 +132,11 @@ def db_session() -> Iterator[sqlite3.Connection]:
 
 
 def init_db() -> None:
-    """Create all tables if they don't exist."""
+    """Create all tables if they don't exist, then apply column migrations."""
     with db_session() as conn:
         for stmt in SCHEMA_STATEMENTS:
             conn.execute(stmt)
+        _apply_column_migrations(conn)
 
 
 def is_empty() -> bool:
@@ -156,43 +181,42 @@ def insert_verification_log(
     summary: str,
     recommendation: str,
     reviewer_note: str,
+    source: str = "DEMO_SAMPLE",
+    scenario_id: Optional[str] = None,
     created_at: Optional[str] = None,
 ) -> str:
-    """Insert one verification result and return its analysis_id."""
+    """Insert one verification result and return its analysis_id.
+
+    `source` records where the verification originated:
+      - DEMO_SAMPLE  — sample-case run
+      - REAL_UPLOAD  — real document upload (Azure DI pipeline)
+    `scenario_id` is set only when source is DEMO_SAMPLE.
+    """
+    base_columns = (
+        "analysis_id, decision, risk_score, risk_level, material_code, "
+        "material_name, supplier, extracted_json, findings_json, "
+        "summary, recommendation, reviewer_note, source, scenario_id"
+    )
+    base_values = (
+        analysis_id, decision, risk_score, risk_level,
+        material_code, material_name, supplier,
+        json.dumps(extracted_fields, ensure_ascii=False),
+        json.dumps(findings, ensure_ascii=False),
+        summary, recommendation, reviewer_note, source, scenario_id,
+    )
     with db_session() as conn:
         if created_at is None:
+            placeholders = ", ".join(["?"] * len(base_values))
             conn.execute(
-                """
-                INSERT INTO verification_logs
-                    (analysis_id, decision, risk_score, risk_level, material_code,
-                     material_name, supplier, extracted_json, findings_json,
-                     summary, recommendation, reviewer_note)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    analysis_id, decision, risk_score, risk_level,
-                    material_code, material_name, supplier,
-                    json.dumps(extracted_fields, ensure_ascii=False),
-                    json.dumps(findings, ensure_ascii=False),
-                    summary, recommendation, reviewer_note,
-                ),
+                f"INSERT INTO verification_logs ({base_columns}) VALUES ({placeholders})",
+                base_values,
             )
         else:
+            placeholders = ", ".join(["?"] * (len(base_values) + 1))
             conn.execute(
-                """
-                INSERT INTO verification_logs
-                    (analysis_id, decision, risk_score, risk_level, material_code,
-                     material_name, supplier, extracted_json, findings_json,
-                     summary, recommendation, reviewer_note, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    analysis_id, decision, risk_score, risk_level,
-                    material_code, material_name, supplier,
-                    json.dumps(extracted_fields, ensure_ascii=False),
-                    json.dumps(findings, ensure_ascii=False),
-                    summary, recommendation, reviewer_note, created_at,
-                ),
+                f"INSERT INTO verification_logs ({base_columns}, created_at) "
+                f"VALUES ({placeholders})",
+                (*base_values, created_at),
             )
     return analysis_id
 
@@ -201,7 +225,7 @@ def list_verification_logs() -> list[dict]:
     with db_session() as conn:
         rows = conn.execute(
             "SELECT analysis_id, decision, risk_score, risk_level, material_code, "
-            "material_name, supplier, summary, created_at "
+            "material_name, supplier, summary, source, scenario_id, created_at "
             "FROM verification_logs ORDER BY id DESC"
         ).fetchall()
     return [dict(r) for r in rows]
@@ -212,7 +236,8 @@ def fetch_verification_log(analysis_id: str) -> Optional[dict]:
         row = conn.execute(
             "SELECT analysis_id, decision, risk_score, risk_level, material_code, "
             "material_name, supplier, extracted_json, findings_json, "
-            "summary, recommendation, reviewer_note, created_at "
+            "summary, recommendation, reviewer_note, source, scenario_id, "
+            "created_at "
             "FROM verification_logs WHERE analysis_id = ?",
             (analysis_id,),
         ).fetchone()

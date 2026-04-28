@@ -1,4 +1,4 @@
-"""Pydantic response schemas for the VeriTrace Lite API."""
+"""Pydantic response schemas for the VeriTrace API."""
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
@@ -107,6 +107,8 @@ class VerificationListItem(BaseModel):
     material_name: Optional[str] = None
     supplier: Optional[str] = None
     summary: Optional[str] = None
+    source: str = "DEMO_SAMPLE"
+    scenario_id: Optional[str] = None
     created_at: str
 
 
@@ -121,4 +123,6 @@ class VerificationResult(BaseModel):
     recommendation: str
     reviewer_note: str
     human_review_required: bool
+    source: str = "DEMO_SAMPLE"
+    scenario_id: Optional[str] = None
     created_at: str

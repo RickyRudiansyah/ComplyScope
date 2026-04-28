@@ -1,6 +1,8 @@
-# VeriTrace Lite
+# VeriTrace
 
-VeriTrace Lite is an AI-assisted material verification system for regulated and pharma supply chains.
+**Material Verification Copilot for Regulated Supply Chains.**
+
+VeriTrace is an AI-assisted material verification system for regulated and pharma supply chains. It cross-checks Certificates of Analysis and material labels against approved specifications and supplier master data, and produces a deterministic decision (APPROVED / NEEDS_REVIEW / REJECTED) with traceable findings.
 
 ## Architecture Overview
 

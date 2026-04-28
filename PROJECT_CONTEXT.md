@@ -1,8 +1,8 @@
-# VeriTrace Lite Project Context
+# VeriTrace Project Context
 
 ## Summary
 
-VeriTrace Lite is an AI-assisted material verification system for regulated and pharma supply chains.
+VeriTrace is an AI-assisted material verification system for regulated and pharma supply chains.
 
 ## Core Workflow
 
@@ -45,11 +45,11 @@ Verification responses should include extracted COA fields, extracted label fiel
 Validation checks should cover material mismatch, batch mismatch, supplier approval, expiry, missing required fields, missing required tests, and generic test results outside configured material specifications.
 
 Nama Project
-VeriTrace Lite
+VeriTrace
 Azure-Powered Material Verification Copilot for Regulated Supply Chains
 Ringkasan Produk
 
-VeriTrace Lite adalah sistem AI-assisted untuk membantu tim QA/QC, warehouse, dan procurement memverifikasi dokumen material masuk di industri regulated, terutama pharma/health manufacturing.
+VeriTrace adalah sistem AI-assisted untuk membantu tim QA/QC, warehouse, dan procurement memverifikasi dokumen material masuk di industri regulated, terutama pharma/health manufacturing.
 
 Sistem menerima:
 
@@ -104,7 +104,7 @@ audit finding,
 kerugian operasional,
 risiko kualitas produk.
 
-VeriTrace Lite menjawab masalah ini dengan:
+VeriTrace menjawab masalah ini dengan:
 
 AI document understanding + master data validation + deterministic decision + evidence-based explanation.
 
@@ -357,7 +357,7 @@ Karena data perusahaan asli sensitif, MVP menggunakan synthetic data.
 
 Framing proposal:
 
-VeriTrace Lite uses synthetic but realistic demo documents because real COA and material receiving documents may contain sensitive supplier and quality information. The COA template is structurally informed by common Certificate of Analysis patterns and public guidance, but no real company document is copied. All supplier names, batch numbers, values, and master data are synthetic.
+VeriTrace uses synthetic but realistic demo documents because real COA and material receiving documents may contain sensitive supplier and quality information. The COA template is structurally informed by common Certificate of Analysis patterns and public guidance, but no real company document is copied. All supplier names, batch numbers, values, and master data are synthetic.
 
 Demo Material
 Material Name : Paracetamol API
@@ -1094,8 +1094,8 @@ Project dianggap siap kalau:
 
 Versi Inggris:
 
-VeriTrace Lite helps QA and warehouse teams verify incoming material documents using Azure Document Intelligence, material-specific validation rules, deterministic risk scoring, and Azure OpenAI-assisted explanation. It does not replace QA; it accelerates first-line screening and makes every verification traceable.
+VeriTrace helps QA and warehouse teams verify incoming material documents using Azure Document Intelligence, material-specific validation rules, deterministic risk scoring, and Azure OpenAI-assisted explanation. It does not replace QA; it accelerates first-line screening and makes every verification traceable.
 
 Versi Indonesia:
 
-VeriTrace Lite membantu tim QA dan warehouse memverifikasi dokumen material masuk menggunakan Azure Document Intelligence, aturan validasi berbasis spesifikasi material, risk scoring deterministik, dan penjelasan berbasis Azure OpenAI. Sistem ini tidak menggantikan QA, tetapi mempercepat screening awal dan membuat setiap keputusan lebih traceable.
+VeriTrace membantu tim QA dan warehouse memverifikasi dokumen material masuk menggunakan Azure Document Intelligence, aturan validasi berbasis spesifikasi material, risk scoring deterministik, dan penjelasan berbasis Azure OpenAI. Sistem ini tidak menggantikan QA, tetapi mempercepat screening awal dan membuat setiap keputusan lebih traceable.

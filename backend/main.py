@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="VeriTrace Lite API", lifespan=lifespan)
+app = FastAPI(title="VeriTrace API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

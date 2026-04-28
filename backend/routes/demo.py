@@ -69,6 +69,8 @@ def run_demo_scenario(scenario_id: str) -> VerificationResult:
         summary=explanation.summary,
         recommendation=explanation.recommendation,
         reviewer_note=explanation.reviewer_note,
+        source="DEMO_SAMPLE",
+        scenario_id=scenario_id,
         created_at=created_at,
     )
 
@@ -83,5 +85,7 @@ def run_demo_scenario(scenario_id: str) -> VerificationResult:
         recommendation=explanation.recommendation,
         reviewer_note=explanation.reviewer_note,
         human_review_required=_human_review_required(risk.decision),
+        source="DEMO_SAMPLE",
+        scenario_id=scenario_id,
         created_at=created_at,
     )

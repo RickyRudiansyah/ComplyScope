@@ -1,1 +1,1 @@
-# Backend package for the VeriTrace Lite API.
+# Backend package for the VeriTrace API.

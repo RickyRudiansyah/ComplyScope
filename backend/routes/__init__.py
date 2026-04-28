@@ -1,1 +1,1 @@
-# Route package for VeriTrace Lite API endpoints.
+# Route package for VeriTrace API endpoints.
