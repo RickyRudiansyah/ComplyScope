@@ -19,7 +19,7 @@ const TYPE_OPTIONS = [
   { value: "COA", label: "Certificate of Analysis (COA)" },
   { value: "LABEL", label: "Material Label" },
   { value: "SUPPORTING", label: "Supporting Document" },
-  { value: "IGNORE", label: "Ignore" },
+  // { value: "IGNORE", label: "Ignore" },
 ];
 
 const ACCEPT = ".pdf,.png,.jpg,.jpeg";
@@ -104,7 +104,8 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
   }
 
   const counts = useMemo(() => {
-    const c = { COA: 0, LABEL: 0, SUPPORTING: 0, IGNORE: 0 };
+    // const c = { COA: 0, LABEL: 0, SUPPORTING: 0, IGNORE: 0 };
+    const c = { COA: 0, LABEL: 0, SUPPORTING: 0};
     for (const f of files) c[f.type] = (c[f.type] || 0) + 1;
     return c;
   }, [files]);
