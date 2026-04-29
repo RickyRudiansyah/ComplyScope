@@ -291,9 +291,17 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
         </div>
       </div>
 
-      <div className="card__footer">
-        VeriTrace compares uploaded documents with approved material specs
-        and supplier records.
+      <div className="card__footer card__footer--stacked">
+        <p>
+          - VeriTrace compares uploaded documents with approved material specs and
+          supplier records.
+        </p>
+        <p>
+          - Complete verification requires one COA and one Material Label.
+        </p>
+        <p>
+          - Future workflows may support partial screening and additional document types.
+        </p>
       </div>
     </section>
   );

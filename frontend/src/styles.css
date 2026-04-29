@@ -361,6 +361,14 @@ button {
   color: var(--c-text-muted);
 }
 
+.card__footer--stacked p {
+  margin: 6px;
+}
+
+.card__footer--stacked p + p {
+  margin-top: -2px;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
