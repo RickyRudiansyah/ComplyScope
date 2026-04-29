@@ -47,10 +47,23 @@ export default function VerifyPage({ uploadEnabled = false, onVerified }) {
     }
   }
 
+  // Throws so UploadPanel can show its own error banner; also clears the
+  // shared run-error so an old failure doesn't linger.
+  async function handleAnalyzeUpload({ coaFile, labelFile }) {
+    setRunError(null);
+    const result = await api.createVerification(coaFile, labelFile);
+    setVerification(result);
+    onVerified?.(result);
+    return result;
+  }
+
   return (
     <div className="stack">
       <div className="verify-grid">
-        <UploadPanel uploadEnabled={uploadEnabled} />
+        <UploadPanel
+          uploadEnabled={uploadEnabled}
+          onAnalyze={handleAnalyzeUpload}
+        />
         <SampleCasesPanel
           scenarios={scenarios}
           loading={scenariosLoading}
@@ -68,8 +81,20 @@ export default function VerifyPage({ uploadEnabled = false, onVerified }) {
         <ResultTabs verification={verification} />
       ) : (
         <div className="card">
-          <div className="card__body empty">
-            Upload documents or run a sample case to see a verification result.
+          <div className="verify-empty">
+            <div className="verify-empty__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 12l2 2 4-4" />
+                <path d="M12 3l8 4v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4z" />
+              </svg>
+            </div>
+            <div>
+              <div className="verify-empty__title">No verification result yet</div>
+              <div className="verify-empty__hint">
+                Upload documents or try a sample case to see decision,
+                findings, and evidence.
+              </div>
+            </div>
           </div>
         </div>
       )}

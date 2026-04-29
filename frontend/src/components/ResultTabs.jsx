@@ -7,7 +7,7 @@ import RecommendationCard from "./RecommendationCard.jsx";
 
 const TABS = [
   { id: "overview", label: "Overview" },
-  { id: "evidence", label: "Evidence" },
+  { id: "evidence", label: "Findings & Evidence" },
   { id: "extracted", label: "Extracted Details" },
 ];
 
@@ -47,7 +47,10 @@ export default function ResultTabs({ verification }) {
             <RecommendationCard verification={verification} />
           ) : null}
           {tab === "evidence" ? (
-            <FindingsPanel findings={verification.findings} />
+            <FindingsPanel
+              findings={verification.findings}
+              riskScore={verification.risk_score}
+            />
           ) : null}
           {tab === "extracted" ? (
             <ExtractedDetailsPanel extracted={verification.extracted_fields} />

@@ -40,6 +40,24 @@ class Settings(BaseModel):
     azure_openai_deployment: str = os.getenv("AZURE_OPENAI_DEPLOYMENT", "")
     azure_openai_api_version: str = os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-15-preview")
 
+    use_llm_explanation: bool = _env_bool("USE_LLM_EXPLANATION", "false")
+    llm_provider: str = os.getenv("LLM_PROVIDER", "github").strip().lower()
+    github_token: str = os.getenv("GITHUB_TOKEN", "")
+    github_model: str = os.getenv("GITHUB_MODEL", "gpt-4o-mini")
+    github_models_endpoint: str = os.getenv(
+        "GITHUB_MODELS_ENDPOINT", "https://models.github.ai/inference"
+    )
+
+    @property
+    def github_models_configured(self) -> bool:
+        return (
+            self.use_llm_explanation
+            and self.llm_provider == "github"
+            and bool(self.github_token)
+            and bool(self.github_model)
+            and bool(self.github_models_endpoint)
+        )
+
     @property
     def doc_intel_configured(self) -> bool:
         return (

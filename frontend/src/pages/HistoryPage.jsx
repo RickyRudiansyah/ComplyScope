@@ -8,14 +8,14 @@ import { api } from "../api.js";
 
 const SOURCE_OPTIONS = [
   { id: "ALL", label: "All sources" },
-  { id: "REAL_UPLOAD", label: "Uploaded Documents" },
-  { id: "DEMO_SAMPLE", label: "Sample Cases" },
+  { id: "REAL_UPLOAD", label: "Uploaded Document" },
+  { id: "DEMO_SAMPLE", label: "Sample Case" },
 ];
 
 const DECISION_OPTIONS = [
   { id: "ALL", label: "All decisions" },
   { id: "APPROVED", label: "Approved" },
-  { id: "NEEDS_REVIEW", label: "Needs Review" },
+  { id: "NEEDS_REVIEW", label: "Needs review" },
   { id: "REJECTED", label: "Rejected" },
 ];
 
@@ -32,6 +32,7 @@ function applyFilters(logs, { source, decision, query }) {
         log.material_code,
         log.supplier,
         log.scenario_id,
+        log.source,
       ]
         .filter(Boolean)
         .join(" ")
@@ -92,11 +93,9 @@ export default function HistoryPage({ refreshKey = 0 }) {
     };
   }, [selectedId]);
 
-  // Smooth-scroll to the detail card when a row is opened.
   useEffect(() => {
     if (!selectedId || !detailRef.current) return;
     const el = detailRef.current;
-    // defer until after detail mounts
     const t = window.setTimeout(() => {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
@@ -115,11 +114,6 @@ export default function HistoryPage({ refreshKey = 0 }) {
 
   return (
     <div className="stack">
-      <div className="banner banner--info">
-        Sample cases are synthetic demo records and are labeled separately from
-        uploaded document runs.
-      </div>
-
       <div className="filter-bar filter-bar--compact">
         <div className="filter-bar__group">
           <label className="filter-bar__label">Source</label>
@@ -166,7 +160,7 @@ export default function HistoryPage({ refreshKey = 0 }) {
             id="history-search"
             type="search"
             className="filter-bar__input"
-            placeholder="Search analysis ID, material, supplier, scenario…"
+            placeholder="Search analysis ID, material, supplier, or source"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -184,7 +178,7 @@ export default function HistoryPage({ refreshKey = 0 }) {
       {logsLoading ? (
         <div className="card">
           <div className="card__body">
-            <Spinner label="Loading verification history…" />
+            <Spinner label="Loading verification history..." />
           </div>
         </div>
       ) : logsErr ? (
@@ -203,14 +197,14 @@ export default function HistoryPage({ refreshKey = 0 }) {
             <div className="card__body">
               <EmptyState
                 title="Select a verification to inspect"
-                hint="Click any row above to load its decision, findings, and extracted details below."
+                hint="Pick any row above to review the decision, findings, and extracted details."
               />
             </div>
           </div>
         ) : detailLoading ? (
           <div className="card">
             <div className="card__body">
-              <Spinner label="Loading verification…" />
+              <Spinner label="Loading verification..." />
             </div>
           </div>
         ) : detailErr ? (

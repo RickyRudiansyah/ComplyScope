@@ -281,6 +281,76 @@
           "storage_condition": "Keep dry, below 25°C"
         }
       }
+    },
+    {
+      "scenario_id": "multiple_issues",
+      "title": "Multiple Issues In One Verification Run",
+      "description": "COA and label have two independent problems at the same time. The COA batch number does not match the label batch number, and the supplier on both documents is not on the approved list for this material. All required tests are present and within specification, quantity matches, and expiry is valid. The validator should produce two findings (BATCH_MISMATCH and SUPPLIER_NOT_APPROVED) and the risk engine should accumulate score from both. Findings, risk score, risk level, and decision are computed at runtime and are NOT stored here.",
+      "extracted_fields": {
+        "coa": {
+          "document_type": "Certificate of Analysis",
+          "coa_no": "COA-GCT-2026-021",
+          "issue_date": "2026-04-25",
+          "page": "1 of 1",
+          "product_name": "Paracetamol API",
+          "material_name": "Paracetamol API",
+          "material_code": "MAT-PCM-001",
+          "category": "API",
+          "supplier": "PT Global Chemical Trading",
+          "manufacturer": "PT Global Chemical Trading Manufacturing Site",
+          "batch_no": "PCM-2026-999",
+          "mfg_date": "2026-01-18",
+          "expiry_date": "2027-03-31",
+          "quantity": "100 kg",
+          "storage_condition": "Keep dry, below 25°C",
+          "test_results": [
+            {
+              "parameter": "Appearance",
+              "method": "Visual",
+              "specification": "White crystalline powder",
+              "result": "White crystalline powder",
+              "unit": "-",
+              "status": "PASS"
+            },
+            {
+              "parameter": "Identification",
+              "method": "FTIR",
+              "specification": "Positive",
+              "result": "Positive",
+              "unit": "-",
+              "status": "PASS"
+            },
+            {
+              "parameter": "Assay",
+              "method": "HPLC",
+              "specification": "98.0 - 102.0",
+              "result": "99.2",
+              "unit": "%",
+              "status": "PASS"
+            },
+            {
+              "parameter": "Moisture",
+              "method": "LOD",
+              "specification": "<= 0.5",
+              "result": "0.26",
+              "unit": "%",
+              "status": "PASS"
+            }
+          ],
+          "conclusion": "The batch complies with the defined material specification.",
+          "authorized_by": "QA Authorized Person"
+        },
+        "label": {
+          "material_name": "Paracetamol API",
+          "material_code": "MAT-PCM-001",
+          "batch_no": "PCM-2026-001",
+          "supplier": "PT Global Chemical Trading",
+          "quantity": "100 kg",
+          "mfg_date": "2026-01-18",
+          "expiry_date": "2027-03-31",
+          "storage_condition": "Keep dry, below 25°C"
+        }
+      }
     }
   ]
 }

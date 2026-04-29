@@ -7,8 +7,7 @@ export default function RecommendationCard({ verification }) {
         <div>
           <h3 className="card__title">Summary &amp; recommendation</h3>
           <p className="card__subtitle">
-            Generated from validator findings. Deterministic; no LLM in this
-            release.
+            Plain-language read-out of the validator findings.
           </p>
         </div>
       </div>

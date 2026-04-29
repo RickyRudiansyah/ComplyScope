@@ -1,16 +1,16 @@
 import StatusBadge from "./StatusBadge.jsx";
 
 const DECISION_LABEL = {
-  APPROVED: "APPROVED",
-  NEEDS_REVIEW: "NEEDS REVIEW",
-  REJECTED: "REJECTED",
+  APPROVED: "Approved",
+  NEEDS_REVIEW: "Needs review",
+  REJECTED: "Rejected",
 };
 
 const DECISION_SUB = {
   APPROVED:
-    "All checks passed. The batch can be released per standard procedure.",
+    "All checks passed. The batch can proceed through standard QA release.",
   NEEDS_REVIEW:
-    "One or more findings require human review before a release decision.",
+    "One or more findings need human review before a release decision.",
   REJECTED:
     "Findings prevent release. Quarantine the batch and trigger deviation handling.",
 };
@@ -66,6 +66,11 @@ export default function DecisionCard({ verification }) {
         </div>
         <p className="decision__sub">
           {DECISION_SUB[decision] || verification.summary}
+        </p>
+        <p className="decision__hint">
+          Risk score is calculated from deterministic validation findings.
+          See <strong>Settings → Decision &amp; Risk Scoring</strong> for the
+          weight matrix.
         </p>
       </div>
 

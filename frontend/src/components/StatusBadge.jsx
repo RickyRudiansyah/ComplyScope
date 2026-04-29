@@ -33,6 +33,12 @@ const SOURCE_LABEL = {
   REAL_UPLOAD: "Uploaded Document",
 };
 
+const DECISION_LABEL = {
+  APPROVED: "Approved",
+  NEEDS_REVIEW: "Needs review",
+  REJECTED: "Rejected",
+};
+
 export default function StatusBadge({ value, kind = "default", label }) {
   const safe = value ? String(value).toUpperCase() : "—";
   let cls = "badge";
@@ -54,6 +60,8 @@ export default function StatusBadge({ value, kind = "default", label }) {
   else if (kind === "warn") cls += " badge--warn";
   else if (kind === "info") cls += " badge--info";
   else cls += " badge--neutral";
+
+  if (!display && kind === "decision") display = DECISION_LABEL[safe];
 
   return <span className={cls}>{display || safe.replace(/_/g, " ")}</span>;
 }

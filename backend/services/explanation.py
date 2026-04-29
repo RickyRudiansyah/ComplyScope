@@ -1,14 +1,24 @@
-"""Template-based explanation builder. No LLM calls; no hallucination.
+"""Explanation builder.
 
-Produces summary, recommendation, reviewer_note strictly from the supplied
-findings and risk decision. Azure OpenAI may later rewrite these for tone, but
-the underlying facts stay deterministic.
+Produces summary, recommendation, reviewer_note for a verification result.
+
+Two providers, in this order:
+  1. GitHub Models (if USE_LLM_EXPLANATION + GITHUB_TOKEN are configured).
+  2. Deterministic template fallback (always available).
+
+The LLM never decides APPROVED / NEEDS_REVIEW / REJECTED and never invents
+evidence. Decision, risk_score, risk_level, and findings come from the
+deterministic risk engine and are passed in here unchanged.
 """
 from __future__ import annotations
 
-from typing import Iterable
+import logging
+from typing import Iterable, Optional
 
 from backend.schemas import Explanation, Finding, RiskResult
+from backend.services.llm_explanation import generate_llm_explanation
+
+logger = logging.getLogger(__name__)
 
 
 _CODE_LABELS = {
@@ -44,12 +54,11 @@ def _pluralize(label: str, count: int) -> str:
     return label + "s"
 
 
-def explain(findings: Iterable[Finding], risk: RiskResult) -> Explanation:
-    findings_list = list(findings)
+def _template_explain(findings: list[Finding], risk: RiskResult) -> Explanation:
     header = _DECISION_HEADER.get(risk.decision, risk.decision)
     recommendation = _DECISION_RECOMMENDATION.get(risk.decision, "")
 
-    if not findings_list:
+    if not findings:
         return Explanation(
             summary=(
                 f"{header} Risk score {risk.risk_score} ({risk.risk_level})."
@@ -59,7 +68,7 @@ def explain(findings: Iterable[Finding], risk: RiskResult) -> Explanation:
         )
 
     counts: dict[str, int] = {}
-    for f in findings_list:
+    for f in findings:
         counts[f.code] = counts.get(f.code, 0) + 1
     counts_text = ", ".join(
         f"{n} {_pluralize(_CODE_LABELS.get(code, code), n)}"
@@ -67,7 +76,7 @@ def explain(findings: Iterable[Finding], risk: RiskResult) -> Explanation:
     )
 
     bullet_lines = [
-        f"- [{f.severity}] {f.code}: {f.message}" for f in findings_list
+        f"- [{f.severity}] {f.code}: {f.message}" for f in findings
     ]
     findings_block = "\n".join(bullet_lines)
 
@@ -85,3 +94,44 @@ def explain(findings: Iterable[Finding], risk: RiskResult) -> Explanation:
         recommendation=recommendation,
         reviewer_note=reviewer_note,
     )
+
+
+def explain(
+    findings: Iterable[Finding],
+    risk: RiskResult,
+    extracted_fields: Optional[dict] = None,
+) -> Explanation:
+    """Return an Explanation for the given verification.
+
+    Tries the configured LLM provider first (currently GitHub Models). Falls
+    back to the deterministic template on any failure (missing config,
+    network error, invalid JSON, or missing keys). The decision and findings
+    are never altered by this function.
+    """
+    findings_list = list(findings)
+
+    try:
+        llm_payload = generate_llm_explanation(
+            decision=risk.decision,
+            risk_score=risk.risk_score,
+            risk_level=risk.risk_level,
+            findings=findings_list,
+            extracted_fields=extracted_fields,
+        )
+    except Exception as exc:  # defensive — provider must never crash the pipeline
+        logger.warning(
+            "LLM explanation raised %s; using template fallback", type(exc).__name__
+        )
+        llm_payload = None
+
+    if llm_payload:
+        try:
+            return Explanation(**llm_payload)
+        except Exception as exc:
+            logger.warning(
+                "LLM explanation could not be coerced into Explanation (%s); "
+                "using template fallback",
+                type(exc).__name__,
+            )
+
+    return _template_explain(findings_list, risk)

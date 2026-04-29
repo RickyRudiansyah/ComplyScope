@@ -23,93 +23,169 @@ export default function SettingsPage() {
   }, []);
 
   return (
-    <div className="settings-grid">
-      <div className="card">
-        <div className="card__header">
-          <div>
-            <h3 className="card__title">System status</h3>
-            <p className="card__subtitle">
-              Live readiness signal for the backend and integrations.
-            </p>
+    <div className="stack settings-page">
+      <div className="settings-grid">
+        <div className="card status-card">
+          <div className="card__header">
+            <div>
+              <h3 className="card__title">System status</h3>
+              <p className="card__subtitle">
+                Readiness signals for the backend and document integrations.
+              </p>
+            </div>
+          </div>
+          <div className="card__body">
+            {loading ? (
+              <Spinner label="Checking backend..." />
+            ) : err ? (
+              <div className="banner banner--error">{err}</div>
+            ) : (
+              <>
+                <div className="kv">
+                  <span className="kv__label">API</span>
+                  <StatusBadge
+                    value={health?.status === "ok" ? "ONLINE" : "OFFLINE"}
+                    kind={health?.status === "ok" ? "ok" : "bad"}
+                  />
+                </div>
+                <div className="kv">
+                  <span className="kv__label">Service</span>
+                  <span style={{ fontFamily: "var(--font-mono)" }}>
+                    {health?.service || "-"}
+                  </span>
+                </div>
+                <div className="kv">
+                  <span className="kv__label">Azure Document Intelligence</span>
+                  <StatusBadge
+                    value={health?.doc_intel_configured ? "CONNECTED" : "NOT CONFIGURED"}
+                    kind={health?.doc_intel_configured ? "ok" : "warn"}
+                  />
+                </div>
+                <div className="kv">
+                  <span className="kv__label">Explanation provider</span>
+                  <StatusBadge value="GitHub Models" kind="info" />
+                </div>
+                <div className="kv">
+                  <span className="kv__label">Decision engine</span>
+                  <StatusBadge value="Deterministic" kind="info" />
+                </div>
+              </>
+            )}
           </div>
         </div>
-        <div className="card__body">
-          {loading ? (
-            <Spinner label="Checking backend…" />
-          ) : err ? (
-            <div className="banner banner--error">{err}</div>
-          ) : (
-            <>
-              <div className="kv">
-                <span className="kv__label">API</span>
-                <StatusBadge
-                  value={health?.status === "ok" ? "ONLINE" : "OFFLINE"}
-                  kind={health?.status === "ok" ? "ok" : "bad"}
-                />
-              </div>
-              <div className="kv">
-                <span className="kv__label">Service</span>
-                <span style={{ fontFamily: "var(--font-mono)" }}>
-                  {health?.service || "—"}
-                </span>
-              </div>
-              <div className="kv">
-                <span className="kv__label">
-                  Azure Document Intelligence
-                </span>
-                <StatusBadge
-                  value={health?.doc_intel_configured ? "CONFIGURED" : "NOT CONFIGURED"}
-                  kind={health?.doc_intel_configured ? "ok" : "warn"}
-                />
-              </div>
-              <div className="kv">
-                <span className="kv__label">Azure OpenAI</span>
-                <StatusBadge
-                  value={
-                    health?.azure_openai_configured ? "CONFIGURED" : "NOT CONFIGURED"
-                  }
-                  kind={health?.azure_openai_configured ? "ok" : "warn"}
-                />
-              </div>
-              <div className="kv">
-                <span className="kv__label">Decision engine</span>
-                <StatusBadge value="DETERMINISTIC" kind="info" />
-              </div>
-            </>
-          )}
+
+        <div className="card">
+          <div className="card__header">
+            <div>
+              <h3 className="card__title">Verification flow</h3>
+              <p className="card__subtitle">
+                How a document pair becomes a reviewable decision.
+              </p>
+            </div>
+          </div>
+          <div className="card__body help">
+            <ol>
+              <li>Extract fields from the COA and material label.</li>
+              <li>Compare against approved material specs and supplier records.</li>
+              <li>Generate validation findings.</li>
+              <li>Calculate risk score and decision.</li>
+              <li>Summarize the result for QA review.</li>
+            </ol>
+            <p style={{ marginTop: 14 }} className="muted">
+              Final status comes from validation findings and the risk policy.
+              Narrative explanations are generated after the decision is already set.
+            </p>
+          </div>
+          <div className="card__footer">
+            Sample records are included for repeatable verification checks.
+          </div>
         </div>
       </div>
 
       <div className="card">
         <div className="card__header">
           <div>
-            <h3 className="card__title">How VeriTrace works</h3>
+            <h3 className="card__title">Decision and risk scoring</h3>
             <p className="card__subtitle">
-              The verification pipeline at a glance.
+              How VeriTrace turns validation findings into risk level and final status.
             </p>
           </div>
         </div>
         <div className="card__body help">
-          <ol>
-            <li>Azure Document Intelligence extracts text, layout, and tables from the COA and label.</li>
-            <li>The parser normalizes those fields against canonical aliases.</li>
-            <li>The deterministic validator compares them with the material master, supplier list, and per-material specs.</li>
-            <li>The risk engine sums finding scores and applies the decision matrix.</li>
-            <li>A template explanation summarizes the findings; Azure OpenAI may later restate the same facts in plain language.</li>
-          </ol>
+          <h4>Risk score</h4>
+          <p>
+            Risk score = sum of finding scores, capped at <strong>100</strong>.
+          </p>
+
+          <h4>Risk level</h4>
+          <ul>
+            <li><strong>0-20</strong> {"->"} LOW</li>
+            <li><strong>21-59</strong> {"->"} MEDIUM</li>
+            <li><strong>60-100</strong> {"->"} HIGH</li>
+          </ul>
+
           <h4>Decision policy</h4>
           <ul>
-            <li><strong>APPROVED</strong> — score 0–20 and no critical out-of-spec.</li>
-            <li><strong>NEEDS_REVIEW</strong> — score 21–59.</li>
-            <li><strong>REJECTED</strong> — score 60+ or any critical out-of-spec test.</li>
+            <li><strong>0-20</strong> {"->"} APPROVED</li>
+            <li><strong>21-59</strong> {"->"} NEEDS_REVIEW</li>
+            <li><strong>60-100</strong> {"->"} REJECTED</li>
+            <li>
+              A <strong>CRITICAL</strong> <code>TEST_RESULT_OUT_OF_SPEC</code>{" "}
+              finding forces REJECTED regardless of total score.
+            </li>
           </ul>
-          <p style={{ marginTop: 14 }} className="muted">
-            The decision is computed entirely from validator findings. Azure
-            OpenAI never decides — it can only describe.
+
+          <h4>Finding weights</h4>
+          <table className="table weight-table">
+            <thead>
+              <tr>
+                <th>Finding type</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>MISSING_REQUIRED_FIELD</code></td>
+                <td>+15</td>
+              </tr>
+              <tr>
+                <td><code>BATCH_MISMATCH</code></td>
+                <td>+35</td>
+              </tr>
+              <tr>
+                <td><code>SUPPLIER_NOT_APPROVED</code></td>
+                <td>+30</td>
+              </tr>
+              <tr>
+                <td><code>EXPIRY_BELOW_THRESHOLD</code></td>
+                <td>+20</td>
+              </tr>
+              <tr>
+                <td><code>MISSING_REQUIRED_TEST</code></td>
+                <td>+25</td>
+              </tr>
+              <tr>
+                <td><code>TEST_RESULT_OUT_OF_SPEC</code></td>
+                <td>+10 / +20 / +30 / +40 by parameter criticality</td>
+              </tr>
+              <tr>
+                <td><code>QUANTITY_MISMATCH</code></td>
+                <td>+15</td>
+              </tr>
+              <tr>
+                <td><code>LOW_EXTRACTION_CONFIDENCE</code> / <code>UNPARSABLE_DOCUMENT</code></td>
+                <td>+25</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p className="muted scoring-note">
+            The scoring matrix is transparent and reviewable. Material release
+            remains with authorized QA personnel.
           </p>
         </div>
         <div className="card__footer">
-          Synthetic dataset only. No real patient, supplier, or batch data is used.
+          Decision logic is computed from validator findings and the configured risk policy.
         </div>
       </div>
     </div>

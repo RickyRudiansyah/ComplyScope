@@ -48,7 +48,7 @@ def run_demo_scenario(scenario_id: str) -> VerificationResult:
 
     findings = validate(extracted_fields)
     risk = decide(findings)
-    explanation = explain(findings, risk)
+    explanation = explain(findings, risk, extracted_fields=extracted_fields)
     api_findings = [ApiFinding.from_finding(f) for f in findings]
 
     coa = extracted_fields.get("coa") or {}

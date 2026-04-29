@@ -5,7 +5,7 @@ ROOT = Path(".")
 required_files = [
     "README.md",
     "PROJECT_CONTEXT.md",
-    ".env.example",
+    ".env",
     ".gitignore",
     "backend/data/seed_materials.json",
     "backend/data/seed_suppliers.json",

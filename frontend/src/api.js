@@ -19,8 +19,13 @@ async function request(path, { method = "GET", body, signal } = {}) {
   const url = `${API_BASE_URL}/api${path}`;
   const init = { method, signal, headers: {} };
   if (body !== undefined) {
-    init.headers["Content-Type"] = "application/json";
-    init.body = JSON.stringify(body);
+    if (body instanceof FormData) {
+      // Let the browser set the multipart boundary in the Content-Type.
+      init.body = body;
+    } else {
+      init.headers["Content-Type"] = "application/json";
+      init.body = JSON.stringify(body);
+    }
   }
   let res;
   try {
@@ -57,6 +62,13 @@ export const api = {
   listVerifications: () => request("/verifications"),
   getVerification: (id) =>
     request(`/verifications/${encodeURIComponent(id)}`),
+
+  createVerification: (coaFile, labelFile) => {
+    const fd = new FormData();
+    fd.append("coa_file", coaFile);
+    fd.append("label_file", labelFile);
+    return request("/verifications", { method: "POST", body: fd });
+  },
 };
 
 export { ApiError };

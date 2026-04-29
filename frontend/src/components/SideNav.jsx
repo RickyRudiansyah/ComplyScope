@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 const ICON = {
   verify: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sidenav__item-icon">
@@ -27,35 +29,72 @@ const ICON = {
   ),
 };
 
-export default function SideNav({ items, current, onChange }) {
+export default function SideNav({ items, current, onChange, open = true, onClose }) {
+  useEffect(() => {
+    if (!open) return;
+    function handleKey(e) {
+      if (e.key === "Escape") onClose?.();
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [open, onClose]);
+
+  function handleSelect(id) {
+    onChange(id);
+    onClose?.();
+  }
+
   return (
-    <aside className="sidenav">
-      <div className="sidenav__brand">
-        <div className="sidenav__brand-mark">VL</div>
-        <div>
-          <div className="sidenav__brand-name">VeriTrace</div>
-          <div className="sidenav__brand-tag">Material Verification Copilot</div>
-        </div>
-      </div>
-      <nav className="sidenav__nav" aria-label="Primary">
-        {items.map((it) => (
+    <>
+      <div
+        className={"sidenav-backdrop" + (open ? " sidenav-backdrop--shown" : "")}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <aside
+        id="primary-nav"
+        className={"sidenav" + (open ? " sidenav--open" : " sidenav--closed")}
+        aria-hidden={!open}
+      >
+        <div className="sidenav__top">
+          <div className="sidenav__brand">
+            <div className="sidenav__brand-mark">VL</div>
+            <div>
+              <div className="sidenav__brand-name">VeriTrace</div>
+              <div className="sidenav__brand-tag">Material Verification Copilot</div>
+            </div>
+          </div>
           <button
-            key={it.id}
             type="button"
-            className={
-              "sidenav__item" +
-              (current === it.id ? " sidenav__item--active" : "")
-            }
-            onClick={() => onChange(it.id)}
+            className="sidenav__close"
+            onClick={onClose}
+            aria-label="Close navigation"
+            title="Close navigation"
           >
-            {ICON[it.icon] || null}
-            <span>{it.label}</span>
+            x
           </button>
-        ))}
-      </nav>
-      <div className="sidenav__footer">
-        Synthetic data — no real patient or supplier records.
-      </div>
-    </aside>
+        </div>
+        <nav className="sidenav__nav" aria-label="Primary">
+          {items.map((it) => (
+            <button
+              key={it.id}
+              type="button"
+              className={
+                "sidenav__item" +
+                (current === it.id ? " sidenav__item--active" : "")
+              }
+              onClick={() => handleSelect(it.id)}
+              tabIndex={open ? 0 : -1}
+            >
+              {ICON[it.icon] || null}
+              <span>{it.label}</span>
+            </button>
+          ))}
+        </nav>
+        <div className="sidenav__footer">
+          VeriTrace · Material Verification Copilot
+        </div>
+      </aside>
+    </>
   );
 }

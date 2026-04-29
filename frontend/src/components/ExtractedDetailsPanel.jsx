@@ -17,15 +17,20 @@ export default function ExtractedDetailsPanel({ extracted }) {
   const coa = extracted?.coa || {};
   const label = extracted?.label || {};
   const tests = Array.isArray(coa.test_results) ? coa.test_results : [];
+  const hasConclusion = !!(coa.conclusion && String(coa.conclusion).trim());
+  const labelHasContent = Object.values(label).some(
+    (v) => v !== null && v !== undefined && v !== ""
+  );
 
   return (
     <div className="stack">
       <div className="card">
         <div className="card__header">
           <div>
-            <h3 className="card__title">COA &amp; label fields</h3>
+            <h3 className="card__title">Field comparison</h3>
             <p className="card__subtitle">
-              Side-by-side of extracted fields. Differences are highlighted.
+              Side-by-side key fields extracted from the COA and material
+              label. Differences are highlighted.
             </p>
           </div>
         </div>
@@ -37,8 +42,10 @@ export default function ExtractedDetailsPanel({ extracted }) {
       <div className="card">
         <div className="card__header">
           <div>
-            <h3 className="card__title">Results of analysis</h3>
-            <p className="card__subtitle">Test results extracted from the COA.</p>
+            <h3 className="card__title">COA test results</h3>
+            <p className="card__subtitle">
+              Quality test results extracted from the Certificate of Analysis.
+            </p>
           </div>
         </div>
         <div className="card__body" style={{ padding: 0 }}>
@@ -78,8 +85,10 @@ export default function ExtractedDetailsPanel({ extracted }) {
       <div className="card">
         <div className="card__header">
           <div>
-            <h3 className="card__title">COA header</h3>
-            <p className="card__subtitle">Document-level fields extracted from the COA.</p>
+            <h3 className="card__title">COA metadata</h3>
+            <p className="card__subtitle">
+              Document-level information extracted from the COA.
+            </p>
           </div>
         </div>
         <div className="card__body">
@@ -99,17 +108,21 @@ export default function ExtractedDetailsPanel({ extracted }) {
               ))}
             </tbody>
           </table>
+          {hasConclusion ? (
+            <p className="muted source-note">
+              This conclusion comes from the source COA, not from VeriTrace.
+            </p>
+          ) : null}
         </div>
       </div>
 
-      {Object.keys(label).length === 0 ? null : (
+      {labelHasContent ? (
         <div className="card">
           <div className="card__header">
             <div>
-              <h3 className="card__title">Material label</h3>
+              <h3 className="card__title">Material label fields</h3>
               <p className="card__subtitle">
-                Raw extracted label fields (already shown above; included for
-                completeness).
+                Fields extracted from the material label.
               </p>
             </div>
           </div>
@@ -126,7 +139,7 @@ export default function ExtractedDetailsPanel({ extracted }) {
             </table>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

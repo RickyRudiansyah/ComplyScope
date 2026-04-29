@@ -65,7 +65,7 @@ export default function MasterDataPage() {
         <div className="card">
           <div className="card__header">
             <div>
-              <h3 className="card__title">Materials</h3>
+              <h3 className="card__title">Material records</h3>
               <p className="card__subtitle">
                 {materialsLoading
                   ? "Loading…"
@@ -120,7 +120,7 @@ export default function MasterDataPage() {
           <div>
             <h3 className="card__title">All suppliers</h3>
             <p className="card__subtitle">
-              Global supplier directory. Approval is granted per material above.
+              Supplier directory. Material-specific approval is shown in the selected material record.
             </p>
           </div>
         </div>
