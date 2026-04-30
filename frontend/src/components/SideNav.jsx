@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 /**
- * Sidebar — Claude Design "QA Operations" panel.
+ * Sidebar — "QA Operations" panel.
  *
  * - 256px wide, slides in from the left as an overlay on small viewports
  *   and pushes content on >=1024px (controlled by .app--nav-open).
@@ -29,6 +29,8 @@ export default function SideNav({
   open = true,
   onClose,
   onOpenHelp,
+  onSignOut,
+  user,
 }) {
   useEffect(() => {
     if (!open) return;
@@ -59,7 +61,7 @@ export default function SideNav({
         <div className="sidenav__top">
           <div>
             <div className="sidenav__section-title">QA Operations</div>
-            <div className="sidenav__section-sub">Material Verification</div>
+            <div className="sidenav__section-sub">Material Verification Workspace</div>
           </div>
           <button
             type="button"
@@ -95,6 +97,12 @@ export default function SideNav({
         </div>
 
         <div className="sidenav__meta">
+          {user ? (
+            <div className="sidenav__user" title={user.email}>
+              <div className="sidenav__user-name">{user.name || "Reviewer"}</div>
+              <div className="sidenav__user-sub">{user.email}</div>
+            </div>
+          ) : null}
           <nav className="sidenav__nav" aria-label="Secondary">
             <button
               type="button"
@@ -114,12 +122,14 @@ export default function SideNav({
             <button
               type="button"
               className="sidenav__item sidenav__item--secondary"
-              disabled
-              title="Account management pending"
+              onClick={() => {
+                onClose?.();
+                onSignOut?.();
+              }}
+              tabIndex={open ? 0 : -1}
             >
               <MIcon name="logout" />
               <span>Sign Out</span>
-              <span className="sidenav__item-hint">In dev</span>
             </button>
           </nav>
         </div>

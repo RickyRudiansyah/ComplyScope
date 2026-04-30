@@ -11,6 +11,8 @@ import MasterDataPage from "./pages/MasterDataPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import VerifyPage from "./pages/VerifyPage.jsx";
+import { signOut } from "./auth/session.js";
+import { ROUTES, navigate } from "./router.js";
 
 const NAV = [
   { id: "verify", label: "Verify", icon: "verify", mIcon: "fact_check" },
@@ -86,7 +88,7 @@ function MIcon({ name, size = 20, className = "" }) {
   );
 }
 
-export default function App() {
+export default function App({ user }) {
   const [view, setView] = useState("verify");
   const [reportId, setReportId] = useState(null);
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
@@ -107,6 +109,11 @@ export default function App() {
     setView("report");
   }
 
+  function handleSignOut() {
+    signOut();
+    navigate(ROUTES.LANDING);
+  }
+
   return (
     <div className={"app" + (navOpen ? " app--nav-open" : "")}>
       <SideNav
@@ -116,6 +123,8 @@ export default function App() {
         open={navOpen}
         onClose={() => setNavOpen(false)}
         onOpenHelp={() => goPrimary("help")}
+        onSignOut={handleSignOut}
+        user={user}
       />
       <PolicyDrawer
         topic={policyTopic}
@@ -151,7 +160,11 @@ export default function App() {
                 Deterministic engine
               </span>
               <NotificationsMenu />
-              <ProfileMenu onOpenProfile={() => goPrimary("profile")} />
+              <ProfileMenu
+                user={user}
+                onOpenProfile={() => goPrimary("profile")}
+                onSignOut={handleSignOut}
+              />
             </div>
           </div>
         </header>

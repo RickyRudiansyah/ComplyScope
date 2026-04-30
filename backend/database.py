@@ -58,6 +58,17 @@ SCHEMA_STATEMENTS: list[str] = [
     )
     """,
     """
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL UNIQUE,
+        name TEXT NOT NULL,
+        organization TEXT,
+        role TEXT,
+        password_hash TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+    """,
+    """
     CREATE TABLE IF NOT EXISTS verification_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         analysis_id TEXT NOT NULL UNIQUE,
@@ -253,6 +264,39 @@ def fetch_verification_log(analysis_id: str) -> Optional[dict]:
     except json.JSONDecodeError:
         d["findings"] = []
     return d
+
+
+def insert_user(
+    *,
+    email: str,
+    name: str,
+    organization: Optional[str],
+    role: Optional[str],
+    password_hash: str,
+) -> dict:
+    """Insert a user; raises sqlite3.IntegrityError on duplicate email."""
+    with db_session() as conn:
+        cur = conn.execute(
+            "INSERT INTO users (email, name, organization, role, password_hash) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (email, name, organization, role, password_hash),
+        )
+        row = conn.execute(
+            "SELECT id, email, name, organization, role, created_at "
+            "FROM users WHERE id = ?",
+            (cur.lastrowid,),
+        ).fetchone()
+    return dict(row) if row else {}
+
+
+def fetch_user_by_email(email: str) -> Optional[dict]:
+    with db_session() as conn:
+        row = conn.execute(
+            "SELECT id, email, name, organization, role, password_hash, created_at "
+            "FROM users WHERE email = ?",
+            (email,),
+        ).fetchone()
+    return dict(row) if row else None
 
 
 def fetch_material_specs(material_code: str) -> list[dict]:

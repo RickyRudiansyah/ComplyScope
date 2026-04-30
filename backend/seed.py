@@ -15,9 +15,13 @@ from pathlib import Path
 from typing import Any
 
 _HERE = Path(__file__).resolve().parent
-from backend.database import db_session, init_db
+from backend.auth import hash_password
+from backend.database import db_session, fetch_user_by_email, init_db, insert_user
 
 DATA_DIR = _HERE / "data"
+
+DEMO_USER_EMAIL = "demo@veritrace.com"
+DEMO_USER_PASSWORD = "demo1234"
 
 
 def _load_json(name: str) -> Any:
@@ -139,17 +143,34 @@ def _seed_suppliers(conn) -> tuple[int, int]:
     return sup_count, map_count
 
 
+def seed_demo_user() -> bool:
+    """Ensure a demo reviewer account exists. Returns True if created."""
+    init_db()
+    if fetch_user_by_email(DEMO_USER_EMAIL):
+        return False
+    insert_user(
+        email=DEMO_USER_EMAIL,
+        name="Demo Reviewer",
+        organization="VeriTrace Demo Co.",
+        role="QA Reviewer",
+        password_hash=hash_password(DEMO_USER_PASSWORD),
+    )
+    return True
+
+
 def seed_all() -> dict:
     init_db()
     with db_session() as conn:
         materials = _seed_materials(conn)
         specs = _seed_specs(conn)
         suppliers, mappings = _seed_suppliers(conn)
+    demo_created = seed_demo_user()
     return {
         "materials": materials,
         "material_specs": specs,
         "suppliers": suppliers,
         "material_suppliers": mappings,
+        "demo_user_created": demo_created,
     }
 
 

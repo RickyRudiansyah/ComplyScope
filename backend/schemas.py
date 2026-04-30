@@ -1,9 +1,21 @@
 """Pydantic response schemas for the VeriTrace API."""
 from __future__ import annotations
 
+import re
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+
+_EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
+_ALLOWED_ROLES = {
+    "QA Reviewer",
+    "QA Manager",
+    "Supplier Quality",
+    "Regulatory Affairs",
+    "Operations",
+    "Other",
+}
 
 
 class HealthResponse(BaseModel):
@@ -116,6 +128,67 @@ class VerificationListItem(BaseModel):
     source: str = "DEMO_SAMPLE"
     scenario_id: Optional[str] = None
     created_at: str
+
+
+class UserPublic(BaseModel):
+    email: str
+    name: str
+    organization: Optional[str] = None
+    role: Optional[str] = None
+    created_at: Optional[str] = None
+
+
+class RegisterRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=120)
+    email: str = Field(..., min_length=3, max_length=200)
+    organization: str = Field(..., min_length=1, max_length=160)
+    role: str = Field(..., min_length=1, max_length=80)
+    password: str = Field(..., min_length=6, max_length=200)
+    confirm_password: str = Field(..., min_length=6, max_length=200)
+
+    @field_validator("name", "organization", "role")
+    @classmethod
+    def _strip_required(cls, v: str) -> str:
+        v = (v or "").strip()
+        if not v:
+            raise ValueError("Field cannot be empty.")
+        return v
+
+    @field_validator("email")
+    @classmethod
+    def _normalize_email(cls, v: str) -> str:
+        v = (v or "").strip().lower()
+        if not _EMAIL_RE.match(v):
+            raise ValueError("Please enter a valid work email address.")
+        return v
+
+    @field_validator("role")
+    @classmethod
+    def _check_role(cls, v: str) -> str:
+        if v not in _ALLOWED_ROLES:
+            # Accept unknown roles as "Other" rather than failing — keeps the
+            # contract permissive for now without losing the field.
+            return "Other"
+        return v
+
+
+class LoginRequest(BaseModel):
+    email: str = Field(..., min_length=3, max_length=200)
+    password: str = Field(..., min_length=1, max_length=200)
+
+    @field_validator("email")
+    @classmethod
+    def _normalize_email(cls, v: str) -> str:
+        v = (v or "").strip().lower()
+        if not _EMAIL_RE.match(v):
+            raise ValueError("Please enter a valid email address.")
+        return v
+
+
+class AuthResponse(BaseModel):
+    user: UserPublic
+    token: str
+    token_type: str = "bearer"
 
 
 class VerificationResult(BaseModel):
