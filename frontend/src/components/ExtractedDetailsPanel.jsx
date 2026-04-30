@@ -98,10 +98,17 @@ export default function ExtractedDetailsPanel({ extracted }) {
                 ["COA number", coa.coa_no],
                 ["Issue date", coa.issue_date],
                 ["Manufacturer", coa.manufacturer],
-                ["Conclusion", coa.conclusion],
+                [
+                  <>
+                    Source document conclusion
+                    <span className="source-doc">From COA</span>
+                  </>,
+                  coa.conclusion,
+                  "conclusion",
+                ],
                 ["Authorized by", coa.authorized_by],
-              ].map(([k, v]) => (
-                <tr key={k}>
+              ].map(([k, v, key]) => (
+                <tr key={key || k}>
                   <td className="compare__field">{k}</td>
                   <td className="compare__cell">{fmt(v)}</td>
                 </tr>
@@ -109,9 +116,25 @@ export default function ExtractedDetailsPanel({ extracted }) {
             </tbody>
           </table>
           {hasConclusion ? (
-            <p className="muted source-note">
-              This conclusion comes from the source COA, not from VeriTrace.
-            </p>
+            <div className="callout callout--accent" style={{ marginTop: 14 }}>
+              <div className="callout__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="9" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12" y2="16.01" />
+                </svg>
+              </div>
+              <div>
+                <div className="callout__title">
+                  Source document conclusions are evidence, not the VeriTrace decision
+                </div>
+                <div className="callout__body">
+                  Source document conclusions are extracted as evidence.
+                  VeriTrace calculates its own decision from document
+                  consistency, master data checks, and risk rules.
+                </div>
+              </div>
+            </div>
           ) : null}
         </div>
       </div>

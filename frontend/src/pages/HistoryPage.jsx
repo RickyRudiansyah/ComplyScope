@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import EmptyState from "../components/EmptyState.jsx";
 import HistoryTable from "../components/HistoryTable.jsx";
-import ResultTabs from "../components/ResultTabs.jsx";
 import Spinner from "../components/Spinner.jsx";
+import StatusBadge from "../components/StatusBadge.jsx";
 import { api } from "../api.js";
 
 const SOURCE_OPTIONS = [
@@ -18,6 +18,18 @@ const DECISION_OPTIONS = [
   { id: "NEEDS_REVIEW", label: "Needs review" },
   { id: "REJECTED", label: "Rejected" },
 ];
+
+const SOURCE_LABEL = {
+  REAL_UPLOAD: "Uploaded Document",
+  DEMO_SAMPLE: "Sample Case",
+};
+
+function formatDate(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString();
+}
 
 function applyFilters(logs, { source, decision, query }) {
   const q = query.trim().toLowerCase();
@@ -43,7 +55,7 @@ function applyFilters(logs, { source, decision, query }) {
   });
 }
 
-export default function HistoryPage({ refreshKey = 0 }) {
+export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
   const [logs, setLogs] = useState([]);
   const [logsLoading, setLogsLoading] = useState(true);
   const [logsErr, setLogsErr] = useState(null);
@@ -56,8 +68,6 @@ export default function HistoryPage({ refreshKey = 0 }) {
   const [sourceFilter, setSourceFilter] = useState("ALL");
   const [decisionFilter, setDecisionFilter] = useState("ALL");
   const [query, setQuery] = useState("");
-
-  const detailRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -93,15 +103,6 @@ export default function HistoryPage({ refreshKey = 0 }) {
     };
   }, [selectedId]);
 
-  useEffect(() => {
-    if (!selectedId || !detailRef.current) return;
-    const el = detailRef.current;
-    const t = window.setTimeout(() => {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
-    return () => window.clearTimeout(t);
-  }, [selectedId]);
-
   const filteredLogs = useMemo(
     () =>
       applyFilters(logs, {
@@ -111,6 +112,14 @@ export default function HistoryPage({ refreshKey = 0 }) {
       }),
     [logs, sourceFilter, decisionFilter, query]
   );
+
+  const selectedRow = useMemo(
+    () => logs.find((l) => l.analysis_id === selectedId),
+    [logs, selectedId]
+  );
+
+  const coa = detail?.extracted_fields?.coa || {};
+  const findings = detail?.findings || [];
 
   return (
     <div className="stack">
@@ -184,35 +193,171 @@ export default function HistoryPage({ refreshKey = 0 }) {
       ) : logsErr ? (
         <div className="banner banner--error">{logsErr}</div>
       ) : (
-        <HistoryTable
-          logs={filteredLogs}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-        />
-      )}
+        <div className="history-grid">
+          <div>
+            <HistoryTable
+              logs={filteredLogs}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+            />
+          </div>
 
-      <section ref={detailRef} className="history-detail-section">
-        {!selectedId ? (
-          <div className="card">
-            <div className="card__body">
+          {selectedId ? (
+            <aside className="history-detail-side" aria-label="Selected verification">
+              {detailLoading ? (
+                <Spinner label="Loading verification…" />
+              ) : detailErr ? (
+                <div className="banner banner--error">{detailErr}</div>
+              ) : detail ? (
+                <>
+                  <div className="row row--between" style={{ alignItems: "flex-start" }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div
+                        className="muted"
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 11,
+                          wordBreak: "break-all",
+                        }}
+                      >
+                        {detail.analysis_id}
+                      </div>
+                      <div style={{ marginTop: 6 }}>
+                        <StatusBadge value={detail.decision} kind="decision" />
+                      </div>
+                      <div style={{ fontWeight: 600, marginTop: 6 }}>
+                        {coa.material_name || selectedRow?.material_name || "—"}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="history-detail-side__close"
+                      onClick={() => setSelectedId(null)}
+                      aria-label="Close detail"
+                      title="Close"
+                    >
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div>
+                    <h4>Verification summary</h4>
+                    <dl>
+                      <div>
+                        <dt>Risk score</dt>
+                        <dd>
+                          {detail.risk_score ?? "—"}/100 ·{" "}
+                          {detail.risk_level || "—"}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Source</dt>
+                        <dd>{SOURCE_LABEL[detail.source] || "—"}</dd>
+                      </div>
+                      <div>
+                        <dt>Timestamp</dt>
+                        <dd style={{ textAlign: "right" }}>
+                          {formatDate(detail.created_at)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Human review</dt>
+                        <dd>{detail.human_review_required ? "Required" : "Not required"}</dd>
+                      </div>
+                    </dl>
+                  </div>
+
+                  <div>
+                    <h4>Entity details</h4>
+                    <dl>
+                      <div>
+                        <dt>Supplier</dt>
+                        <dd>{coa.supplier || "—"}</dd>
+                      </div>
+                      <div>
+                        <dt>Batch</dt>
+                        <dd>{coa.batch_no || "—"}</dd>
+                      </div>
+                      <div>
+                        <dt>Manufacturer</dt>
+                        <dd>{coa.manufacturer || "—"}</dd>
+                      </div>
+                    </dl>
+                  </div>
+
+                  <div>
+                    <h4>Key findings</h4>
+                    {findings.length === 0 ? (
+                      <ul>
+                        <li>
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--c-ok)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M9 12l2 2 4-4" />
+                          </svg>
+                          <span>No findings — all checks passed.</span>
+                        </li>
+                      </ul>
+                    ) : (
+                      <ul>
+                        {findings.slice(0, 5).map((f, i) => (
+                          <li key={`${f.type}-${i}`}>
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--c-warn)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M12 9v4" />
+                              <path d="M12 17h.01" />
+                              <path d="M10.3 3.86l-8.3 14.4A2 2 0 0 0 3.7 21h16.6a2 2 0 0 0 1.7-2.74L13.7 3.86a2 2 0 0 0-3.4 0z" />
+                            </svg>
+                            <span>{f.message || f.type}</span>
+                          </li>
+                        ))}
+                        {findings.length > 5 ? (
+                          <li className="muted" style={{ fontSize: 11 }}>
+                            + {findings.length - 5} more in the full report
+                          </li>
+                        ) : null}
+                      </ul>
+                    )}
+                  </div>
+
+                  {detail.recommendation ? (
+                    <div>
+                      <h4>Recommendation</h4>
+                      <p
+                        className="muted"
+                        style={{ margin: 0, fontSize: 12, lineHeight: 1.5 }}
+                      >
+                        {detail.recommendation}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    className="btn btn--block"
+                    onClick={() => onOpenReport?.(detail.analysis_id)}
+                  >
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 3h7v7" />
+                      <path d="M10 14L21 3" />
+                      <path d="M21 14v7H3V3h7" />
+                    </svg>
+                    View full report
+                  </button>
+                </>
+              ) : null}
+            </aside>
+          ) : (
+            <aside className="history-detail-side" aria-label="No selection">
               <EmptyState
-                title="Select a verification to inspect"
-                hint="Pick any row above to review the decision, findings, and extracted details."
+                title="Select a verification"
+                hint="Pick any row to see its decision summary, key findings, and a link to the full audit report."
               />
-            </div>
-          </div>
-        ) : detailLoading ? (
-          <div className="card">
-            <div className="card__body">
-              <Spinner label="Loading verification..." />
-            </div>
-          </div>
-        ) : detailErr ? (
-          <div className="banner banner--error">{detailErr}</div>
-        ) : detail ? (
-          <ResultTabs verification={detail} />
-        ) : null}
-      </section>
+            </aside>
+          )}
+        </div>
+      )}
     </div>
   );
 }

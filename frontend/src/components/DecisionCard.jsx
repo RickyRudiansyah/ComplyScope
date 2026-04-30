@@ -2,7 +2,7 @@ import StatusBadge from "./StatusBadge.jsx";
 
 const DECISION_LABEL = {
   APPROVED: "Approved",
-  NEEDS_REVIEW: "Needs review",
+  NEEDS_REVIEW: "Needs Review",
   REJECTED: "Rejected",
 };
 
@@ -50,15 +50,16 @@ export default function DecisionCard({ verification }) {
         >
           {DECISION_LABEL[decision] || decision || "—"}
         </div>
-        <div className="row row--wrap" style={{ gap: 8, marginTop: 12 }}>
+        <div className="decision-score" aria-live="polite">
+          {verification.risk_score ?? "—"}
+          <span className="decision-score__den">/100</span>
+        </div>
+        <div className="row row--wrap" style={{ gap: 8 }}>
           <StatusBadge
             value={verification.risk_level}
             kind="risk"
             label={`Risk: ${verification.risk_level || "—"}`}
           />
-          <span className="badge badge--neutral">
-            Score {verification.risk_score ?? "—"} / 100
-          </span>
           {verification.human_review_required ? (
             <span className="badge badge--warn">Human review required</span>
           ) : null}
