@@ -22,14 +22,12 @@ export default function HistoryTable({ logs, selectedId, onSelect }) {
       <table className="table table--clickable history-table">
         <thead>
           <tr>
-            <th className="col-when">When</th>
+            <th className="col-when">Time</th>
             <th className="col-analysis">Analysis</th>
             <th className="col-material">Material</th>
-            <th className="col-supplier">Supplier</th>
+            <th className="col-supplier">Supplier / Batch No.</th>
             <th className="col-decision">Decision</th>
-            <th className="col-score" style={{ textAlign: "right" }}>
-              Score
-            </th>
+            <th className="col-risk">Risk</th>
           </tr>
         </thead>
         <tbody>
@@ -45,14 +43,12 @@ export default function HistoryTable({ logs, selectedId, onSelect }) {
                 <td className="col-analysis">
                   <div className="analysis-cell">
                     <div className="analysis-cell__id">{log.analysis_id}</div>
-                    <div className="analysis-cell__meta">
-                      <StatusBadge value={log.source} kind="source" />
-                      {isSample && log.scenario_id ? (
-                        <span className="analysis-cell__scenario">
-                          {log.scenario_id}
-                        </span>
-                      ) : null}
-                    </div>
+                    <StatusBadge value={log.source} kind="source" />
+                    {isSample && log.scenario_id ? (
+                      <span className="analysis-cell__scenario">
+                        {log.scenario_id}
+                      </span>
+                    ) : null}
                   </div>
                 </td>
                 <td className="col-material">
@@ -67,20 +63,29 @@ export default function HistoryTable({ logs, selectedId, onSelect }) {
                   className="col-supplier"
                   title={log.supplier || ""}
                 >
-                  {log.supplier || "—"}
+                  <div>{log.supplier || "—"}</div>
+                  {log.batch_no ? (
+                    <div
+                      className="muted"
+                      style={{ fontSize: 11, fontFamily: "var(--font-mono)", marginTop: 2 }}
+                    >
+                      {log.batch_no}
+                    </div>
+                  ) : null}
                 </td>
                 <td className="col-decision">
                   <StatusBadge value={log.decision} kind="decision" />
                 </td>
-                <td
-                  className="col-score"
-                  style={{
-                    textAlign: "right",
-                    fontFamily: "var(--font-mono)",
-                    fontWeight: 600,
-                  }}
-                >
-                  {log.risk_score ?? "—"}
+                <td className="col-risk">
+                  <div className="risk-cell">
+                    <span className="risk-cell__score">
+                      {log.risk_score ?? "—"}
+                      <span className="risk-cell__den">/100</span>
+                    </span>
+                    {log.risk_level ? (
+                      <StatusBadge value={log.risk_level} kind="risk" />
+                    ) : null}
+                  </div>
                 </td>
               </tr>
             );

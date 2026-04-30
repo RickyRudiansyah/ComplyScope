@@ -155,7 +155,7 @@ export default function ExtractedDetailsPanel({ extracted }) {
                 {Object.entries(label).map(([k, v]) => (
                   <tr key={k}>
                     <td className="compare__field">{k}</td>
-                    <td className="compare__cell">{fmt(v)}</td>
+                    <td>{fmt(v)}</td>
                   </tr>
                 ))}
               </tbody>

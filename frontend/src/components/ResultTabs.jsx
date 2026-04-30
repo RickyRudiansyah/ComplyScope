@@ -19,43 +19,40 @@ export default function ResultTabs({ verification }) {
     <div className="stack">
       <DecisionCard verification={verification} />
 
-      <div className="card" style={{ overflow: "hidden" }}>
-        <div className="tabs">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className={
-                "tabs__btn" + (tab === t.id ? " tabs__btn--active" : "")
-              }
-              onClick={() => setTab(t.id)}
-            >
-              {t.label}
-              {t.id === "evidence" && verification.findings?.length ? (
-                <span
-                  className="badge badge--neutral"
-                  style={{ marginLeft: 8 }}
-                >
-                  {verification.findings.length}
-                </span>
-              ) : null}
-            </button>
-          ))}
-        </div>
-        <div style={{ padding: 20 }}>
-          {tab === "overview" ? (
-            <RecommendationCard verification={verification} />
-          ) : null}
-          {tab === "evidence" ? (
-            <FindingsPanel
-              findings={verification.findings}
-              riskScore={verification.risk_score}
-            />
-          ) : null}
-          {tab === "extracted" ? (
-            <ExtractedDetailsPanel extracted={verification.extracted_fields} />
-          ) : null}
-        </div>
+      <div className="result-tabs">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            className={
+              "result-tabs__btn" +
+              (tab === t.id ? " result-tabs__btn--active" : "")
+            }
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+            {t.id === "evidence" && verification.findings?.length ? (
+              <span className="result-tabs__count">
+                {verification.findings.length}
+              </span>
+            ) : null}
+          </button>
+        ))}
+      </div>
+
+      <div>
+        {tab === "overview" ? (
+          <RecommendationCard verification={verification} />
+        ) : null}
+        {tab === "evidence" ? (
+          <FindingsPanel
+            findings={verification.findings}
+            riskScore={verification.risk_score}
+          />
+        ) : null}
+        {tab === "extracted" ? (
+          <ExtractedDetailsPanel extracted={verification.extracted_fields} />
+        ) : null}
       </div>
     </div>
   );

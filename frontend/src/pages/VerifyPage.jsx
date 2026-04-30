@@ -60,19 +60,17 @@ export default function VerifyPage({ uploadEnabled = false, onVerified }) {
   return (
     <div className="stack">
       <div className="info-tile" role="note">
-        <div className="info-tile__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="9" />
-            <line x1="12" y1="8" x2="12" y2="12" />
-            <line x1="12" y1="16" x2="12" y2="16.01" />
-          </svg>
-        </div>
+        <span
+          className="material-symbols-outlined info-tile__mi"
+          aria-hidden="true"
+        >
+          info
+        </span>
         <div>
           <div className="info-tile__title">Verification requirements</div>
           <div className="info-tile__hint">
-            Complete verification requires exactly <strong>1 Certificate of
-            Analysis</strong> and <strong>1 Material Label</strong>. Supporting
-            documents may be queued but are not analyzed in this release.
+            A verification record requires exactly one Certificate of Analysis
+            and one Material Label.
           </div>
         </div>
       </div>
@@ -107,10 +105,10 @@ export default function VerifyPage({ uploadEnabled = false, onVerified }) {
               </svg>
             </div>
             <div>
-              <div className="verify-empty__title">No verification result yet</div>
+              <div className="verify-empty__title">No verification record yet</div>
               <div className="verify-empty__hint">
-                Upload documents or try a sample case to see decision,
-                findings, and evidence.
+                Submit a source document set or run a sample case to produce a
+                decision, findings, and supporting evidence.
               </div>
             </div>
           </div>

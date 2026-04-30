@@ -156,9 +156,9 @@ export default function MasterDataPage() {
           </svg>
         </div>
         <div>
-          Master data is treated as the approved source of truth for verification.
-          The MVP is read-only; updates are managed through controlled QA processes.
-          Editable workflows are <span className="dev-badge dev-badge--neutral">In development</span>.
+          Master data is the approved source of truth used by the verification
+          engine. Records are read-only in this release; updates are managed
+          through controlled QA processes.
         </div>
       </div>
 
@@ -269,7 +269,6 @@ export default function MasterDataPage() {
                         <th>Parameter</th>
                         <th>Specification</th>
                         <th>Method</th>
-                        <th>Required</th>
                         <th>Criticality</th>
                       </tr>
                     </thead>
@@ -288,13 +287,6 @@ export default function MasterDataPage() {
                           </td>
                           <td>{r.method || "—"}</td>
                           <td>
-                            {r.required ? (
-                              <StatusBadge value="Required" kind="ok" />
-                            ) : (
-                              <span className="muted">Optional</span>
-                            )}
-                          </td>
-                          <td>
                             <StatusBadge value={r.criticality} kind="severity" />
                           </td>
                         </tr>
@@ -309,27 +301,33 @@ export default function MasterDataPage() {
                   <Spinner label="Loading suppliers…" />
                 ) : suppliersErr ? (
                   <div className="banner banner--error">{suppliersErr}</div>
-                ) : suppliers.length === 0 ? (
+                ) : supplierStatusRows.length === 0 ? (
                   <EmptyState title="No suppliers configured" />
                 ) : (
                   <div className="supplier-card-grid">
-                    {suppliers.map((s) => (
-                      <div key={s.supplier_name} className="supplier-card">
-                        <div className="supplier-card__icon" aria-hidden="true">
-                          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 21V7l9-4 9 4v14" />
-                            <path d="M9 21v-6h6v6" />
-                          </svg>
-                        </div>
+                    {supplierStatusRows.map((r, i) => (
+                      <div
+                        key={`${r.material_code}-${r.supplier_name}-${i}`}
+                        className="supplier-card"
+                      >
+                        <span
+                          className="material-symbols-outlined supplier-card__icon"
+                          aria-hidden="true"
+                        >
+                          business
+                        </span>
                         <div className="supplier-card__main">
                           <div className="supplier-card__name">
-                            {s.supplier_name}
+                            {r.supplier_name}
                           </div>
                           <div className="supplier-card__meta">
-                            Directory record
+                            {r.material_name} ·{" "}
+                            <span style={{ fontFamily: "var(--font-mono)" }}>
+                              {r.material_code}
+                            </span>
                           </div>
                         </div>
-                        <StatusBadge value={s.status} kind="supplier" />
+                        <StatusBadge value={r.status} kind="supplier" />
                       </div>
                     ))}
                   </div>
@@ -348,6 +346,7 @@ export default function MasterDataPage() {
                         <th>Code</th>
                         <th>Category</th>
                         <th>Status</th>
+                        <th>Last reviewed</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -365,6 +364,9 @@ export default function MasterDataPage() {
                           </td>
                           <td>
                             <StatusBadge value={r.status} kind="supplier" />
+                          </td>
+                          <td className="muted" style={{ fontSize: 12 }}>
+                            —
                           </td>
                         </tr>
                       ))}

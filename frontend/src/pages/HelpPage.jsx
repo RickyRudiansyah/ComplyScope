@@ -1,105 +1,62 @@
 /**
- * Help & Documentation — secondary utility page restored from the
- * Claude/Stitch design. Not exposed in primary navigation.
+ * Help & Documentation — secondary utility page.
  *
+ * Topic icons use Material Symbols Outlined to match Claude Design.
  * Contact methods are placeholders; no support backend exists yet.
  */
 
 const TOPICS = [
   {
-    icon: (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-        <polyline points="17 8 12 3 7 8" />
-        <line x1="12" y1="3" x2="12" y2="15" />
-      </svg>
-    ),
+    icon: "upload_file",
     title: "Uploading documents",
     body:
-      "Go to the Verify page. Drag and drop or browse for your COA and Material Label files. Assign each file its document type, then click Run verification. Supporting documents may be attached but are not analyzed in the current version.",
+      "From the Verify page, drag and drop or browse for the Certificate of Analysis and Material Label. Assign each file its document type, then start the verification. Supporting documents may be attached for reference but are not analysed in this release.",
   },
   {
-    icon: (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 12l2 2 4-4" />
-        <path d="M12 3l8 4v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4z" />
-      </svg>
-    ),
+    icon: "fact_check",
     title: "Understanding verification results",
     body:
-      "VeriTrace produces a deterministic decision: APPROVED, NEEDS REVIEW, or REJECTED. The risk score (0–100) is the sum of finding weights. 0–20 is low risk; 21–59 needs manual review; 60–100 triggers rejection. The LLM only generates summary text — it does not influence the final decision.",
+      "VeriTrace produces a deterministic decision: Approved, Needs Review, or Rejected. The risk score (0–100) is the capped sum of finding weights. 0–20 is auto-approve eligible; 21–59 requires manual QA review; 60–100 is auto-reject. The LLM only summarises findings — it does not set the decision.",
   },
   {
-    icon: (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="7" />
-        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-      </svg>
-    ),
+    icon: "search",
     title: "Reading findings & evidence",
     body:
-      "Each finding shows its type code, severity, score contribution, and evidence key-value pairs. Use the Extracted Details tab to view side-by-side field comparison, COA test results, COA metadata, and label fields.",
+      "Each finding shows its type code, severity, score contribution, and supporting evidence. The Extracted Details tab presents a side-by-side field comparison, COA test results, COA metadata, and material label fields.",
   },
   {
-    icon: (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 12a9 9 0 1 0 3-6.7" />
-        <path d="M3 4v5h5" />
-        <path d="M12 7v5l3 2" />
-      </svg>
-    ),
+    icon: "history_edu",
     title: "Using verification history",
     body:
-      "The History page is a read-only audit trail. Use filters to narrow by source or decision. Click any row for a side summary, or open the Full Report for a complete audit-style view.",
+      "The History page is a read-only audit trail. Filter by source or decision, search by analysis ID, material, or supplier. Selecting a row reveals the overview report; the full report opens in a dedicated view.",
   },
   {
-    icon: (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <ellipse cx="12" cy="5" rx="8" ry="3" />
-        <path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5" />
-        <path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6" />
-      </svg>
-    ),
+    icon: "storage",
     title: "Master data reference",
     body:
-      "The Master Data page shows approved materials, required test specifications, and approved suppliers used by the validation engine. It is read-only in the current version.",
+      "The Master Data page shows approved materials, required test specifications, and approved suppliers used by the verification engine. Records are read-only in this release.",
   },
   {
-    icon: (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 9h6v6h-6z" />
-        <path d="M3 12h2M19 12h2M12 3v2M12 19v2" />
-        <circle cx="12" cy="12" r="9" />
-      </svg>
-    ),
+    icon: "science",
     title: "Sample cases",
     body:
-      "Sample cases use synthetic data to demonstrate common outcomes: valid batch, batch mismatch, out-of-spec test results, unapproved supplier, and combined issues.",
+      "Sample cases use synthetic data to demonstrate common outcomes: valid match, batch mismatch, out-of-specification test result, unapproved supplier, and combined issues.",
   },
   {
-    icon: (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 3l8 4v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4z" />
-      </svg>
-    ),
+    icon: "shield",
     title: "Audit & compliance",
     body:
-      "All verifications are saved to an immutable audit trail. Records cannot be modified or deleted from the UI. Final release decisions remain the responsibility of authorized QA personnel.",
+      "All verification records are saved to an immutable audit trail. Records cannot be modified or deleted from the UI. Final material release decisions remain with authorized QA personnel.",
   },
   {
-    icon: (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="3" />
-        <path d="M19 12a7 7 0 1 1-14 0 7 7 0 0 1 14 0z" />
-      </svg>
-    ),
+    icon: "settings",
     title: "System status & scoring policy",
     body:
-      "The Settings page shows service status, the verification pipeline, the risk scoring matrix, and the finding weight table. It also explains how VeriTrace makes deterministic decisions.",
+      "The Settings page shows service status (from /health), the verification pipeline, the risk scoring bands, and the finding weight table. It also describes how VeriTrace makes deterministic decisions.",
   },
 ];
 
-export default function HelpPage({ onOpenPolicy }) {
+export default function HelpPage() {
   return (
     <div className="stack">
       <div className="info-tile" role="note">
@@ -111,29 +68,25 @@ export default function HelpPage({ onOpenPolicy }) {
           </svg>
         </div>
         <div>
-          <div className="info-tile__title">Help & documentation</div>
+          <div className="info-tile__title">Help &amp; documentation</div>
           <div className="info-tile__hint">
-            VeriTrace is a prototype system. All verifications must be reviewed
-            by authorized QA personnel before any material release action.
+            Reference material for QA reviewers and auditors. Final material
+            release decisions remain with authorized QA personnel.
           </div>
         </div>
       </div>
 
-      <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
+      <div className="help-grid">
         {TOPICS.map((t) => (
-          <div key={t.title} className="card">
+          <div key={t.title} className="card help-card">
             <div className="card__body">
-              <div className="section-head">
-                <div className="section-head__icon" aria-hidden="true">
-                  {t.icon}
+              <div className="help-card__head">
+                <div className="help-card__icon" aria-hidden="true">
+                  <span className="material-symbols-outlined">{t.icon}</span>
                 </div>
-                <div>
-                  <h3 className="section-head__title">{t.title}</h3>
-                </div>
+                <h3 className="help-card__title">{t.title}</h3>
               </div>
-              <p className="muted" style={{ margin: 0, lineHeight: 1.55 }}>
-                {t.body}
-              </p>
+              <p className="help-card__body">{t.body}</p>
             </div>
           </div>
         ))}
@@ -144,8 +97,8 @@ export default function HelpPage({ onOpenPolicy }) {
           <div>
             <h3 className="card__title">Contact support</h3>
             <p className="card__subtitle">
-              Reach out for issues, questions, or to report a discrepancy in
-              verification results.
+              Reach out for system issues, access questions, or to report a
+              discrepancy in a verification record.
             </p>
           </div>
           <span className="dev-badge">Backend pending</span>
@@ -171,7 +124,7 @@ export default function HelpPage({ onOpenPolicy }) {
                 <div className="muted" style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 4 }}>
                   QA helpdesk
                 </div>
-                <div style={{ fontWeight: 600 }}>Internal IT & QA Helpdesk</div>
+                <div style={{ fontWeight: 600 }}>Internal IT &amp; QA Helpdesk</div>
                 <div className="muted" style={{ fontSize: 12.5 }}>
                   helpdesk@pharmasystems.internal (placeholder)
                 </div>
@@ -180,29 +133,6 @@ export default function HelpPage({ onOpenPolicy }) {
                 </div>
               </div>
             </div>
-          </div>
-          <div className="row" style={{ gap: 10, marginTop: 16, flexWrap: "wrap" }}>
-            <button
-              type="button"
-              className="btn"
-              onClick={() => onOpenPolicy?.("support")}
-            >
-              Open support ticket
-            </button>
-            <button
-              type="button"
-              className="btn"
-              onClick={() => onOpenPolicy?.("audit")}
-            >
-              Audit log protocol
-            </button>
-            <button
-              type="button"
-              className="btn"
-              onClick={() => onOpenPolicy?.("privacy")}
-            >
-              Privacy policy
-            </button>
           </div>
         </div>
       </div>

@@ -68,6 +68,8 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
   const [sourceFilter, setSourceFilter] = useState("ALL");
   const [decisionFilter, setDecisionFilter] = useState("ALL");
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   useEffect(() => {
     let cancelled = false;
@@ -113,6 +115,17 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
     [logs, sourceFilter, decisionFilter, query]
   );
 
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pagedLogs = useMemo(
+    () => filteredLogs.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [filteredLogs, safePage]
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [sourceFilter, decisionFilter, query, refreshKey]);
+
   const selectedRow = useMemo(
     () => logs.find((l) => l.analysis_id === selectedId),
     [logs, selectedId]
@@ -121,60 +134,67 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
   const coa = detail?.extracted_fields?.coa || {};
   const findings = detail?.findings || [];
 
+  const filtersDirty =
+    sourceFilter !== "ALL" || decisionFilter !== "ALL" || query.trim() !== "";
+
+  function clearFilters() {
+    setSourceFilter("ALL");
+    setDecisionFilter("ALL");
+    setQuery("");
+  }
+
   return (
     <div className="stack">
-      <div className="filter-bar filter-bar--compact">
-        <div className="filter-bar__group">
-          <label className="filter-bar__label">Source</label>
-          <div className="segmented">
-            {SOURCE_OPTIONS.map((opt) => (
-              <button
-                key={opt.id}
-                type="button"
-                className={
-                  "segmented__btn" +
-                  (sourceFilter === opt.id ? " segmented__btn--active" : "")
-                }
-                onClick={() => setSourceFilter(opt.id)}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="filter-bar__group">
-          <label className="filter-bar__label" htmlFor="decision-filter">
-            Decision
-          </label>
-          <select
-            id="decision-filter"
-            className="filter-bar__select"
-            value={decisionFilter}
-            onChange={(e) => setDecisionFilter(e.target.value)}
+      <div className="filter-bar">
+        <div className="filter-bar__search">
+          <span
+            className="material-symbols-outlined filter-bar__search-icon"
+            aria-hidden="true"
           >
-            {DECISION_OPTIONS.map((opt) => (
-              <option key={opt.id} value={opt.id}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="filter-bar__group filter-bar__group--grow">
-          <label className="filter-bar__label" htmlFor="history-search">
-            Search
-          </label>
+            search
+          </span>
           <input
             id="history-search"
             type="search"
             className="filter-bar__input"
-            placeholder="Search analysis ID, material, supplier, or source"
+            placeholder="Search analysis ID, material, or supplier"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            aria-label="Search verifications"
           />
         </div>
-
+        <select
+          aria-label="Filter by source"
+          className="filter-bar__select"
+          value={sourceFilter}
+          onChange={(e) => setSourceFilter(e.target.value)}
+        >
+          {SOURCE_OPTIONS.map((opt) => (
+            <option key={opt.id} value={opt.id}>
+              Source: {opt.label.replace(/^All sources$/, "All")}
+            </option>
+          ))}
+        </select>
+        <select
+          aria-label="Filter by decision"
+          className="filter-bar__select"
+          value={decisionFilter}
+          onChange={(e) => setDecisionFilter(e.target.value)}
+        >
+          {DECISION_OPTIONS.map((opt) => (
+            <option key={opt.id} value={opt.id}>
+              Decision: {opt.label.replace(/^All decisions$/, "All")}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="filter-bar__clear"
+          onClick={clearFilters}
+          disabled={!filtersDirty}
+        >
+          Clear filters
+        </button>
         <div className="filter-bar__count">
           {logsLoading
             ? ""
@@ -194,12 +214,42 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
         <div className="banner banner--error">{logsErr}</div>
       ) : (
         <div className="history-grid">
-          <div>
+          <div className="stack" style={{ gap: 12, minWidth: 0 }}>
             <HistoryTable
-              logs={filteredLogs}
+              logs={pagedLogs}
               selectedId={selectedId}
               onSelect={setSelectedId}
             />
+            {filteredLogs.length > 0 ? (
+              <div className="pagination" role="navigation" aria-label="History pagination">
+                <span className="pagination__count">
+                  {(safePage - 1) * PAGE_SIZE + 1}–
+                  {Math.min(safePage * PAGE_SIZE, filteredLogs.length)} of{" "}
+                  {filteredLogs.length}
+                </span>
+                <div className="pagination__controls">
+                  <button
+                    type="button"
+                    className="pagination__btn"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={safePage <= 1}
+                  >
+                    Previous
+                  </button>
+                  <span className="pagination__page">
+                    Page {safePage} of {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className="pagination__btn"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={safePage >= totalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
 
           {selectedId ? (
@@ -352,7 +402,7 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
             <aside className="history-detail-side" aria-label="No selection">
               <EmptyState
                 title="Select a verification"
-                hint="Pick any row to see its decision summary, key findings, and a link to the full audit report."
+                hint="Choose a record from the table to review decision, risk, findings, and evidence."
               />
             </aside>
           )}

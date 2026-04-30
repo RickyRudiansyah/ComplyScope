@@ -112,7 +112,6 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
 
   const ready = counts.COA === 1 && counts.LABEL === 1;
   const tooMany = counts.COA > 1 || counts.LABEL > 1;
-  const hasSupporting = counts.SUPPORTING > 0;
 
   let validationMessage = null;
   if (files.length > 0) {
@@ -147,7 +146,7 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
         <div>
           <h3 className="card__title">Upload documents</h3>
           <p className="card__subtitle">
-            Add files, assign their document type, then run verification.
+            Attach a Certificate of Analysis and a Material Label, then run verification.
           </p>
         </div>
       </div>
@@ -155,8 +154,7 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
       <div className="card__body">
         <div
           className={
-            "upload-drop upload-drop--clickable" +
-            (dragActive ? " upload-drop--active" : "")
+            "upload-drop" + (dragActive ? " upload-drop--active" : "")
           }
           role="button"
           tabIndex={0}
@@ -172,10 +170,16 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
           onDragLeave={onDragLeave}
           onDrop={onDrop}
         >
-          <strong>Drop files here, or click to browse</strong>
-          <div style={{ marginTop: 4, fontSize: 12 }}>
-            PDF, PNG, or JPG supported
-          </div>
+          <span
+            className="material-symbols-outlined upload-drop__icon"
+            aria-hidden="true"
+          >
+            upload_file
+          </span>
+          <p className="upload-drop__title">Drag &amp; drop files here</p>
+          <p className="upload-drop__hint">
+            or click to browse (PDF, PNG, JPG)
+          </p>
           <input
             ref={inputRef}
             type="file"
@@ -188,26 +192,33 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
 
         {files.length > 0 ? (
           <ul className="file-list">
-            {files.map((f) => (
-              <li key={f.id} className="file-row">
-                <div className="file-row__main">
-                  <div className="file-row__name" title={f.file.name}>
-                    {f.file.name}
-                  </div>
-                  <div className="file-row__meta">
-                    {formatBytes(f.file.size)}
-                  </div>
-                </div>
-                <div className="file-row__type">
-                  <label
-                    className="file-row__type-label"
-                    htmlFor={`type-${f.id}`}
+            {files.map((f) => {
+              const isImage = /\.(png|jpe?g)$/i.test(f.file.name);
+              return (
+                <li key={f.id} className="file-row">
+                  <span
+                    className="material-symbols-outlined file-row__icon"
+                    aria-hidden="true"
                   >
-                    Document type
-                  </label>
+                    {isImage ? "image" : "description"}
+                  </span>
+                  <div className="file-row__main">
+                    <div className="file-row__name" title={f.file.name}>
+                      {f.file.name}
+                    </div>
+                    <div className="file-row__status">
+                      <span
+                        className="material-symbols-outlined file-row__status-icon"
+                        aria-hidden="true"
+                      >
+                        check_circle
+                      </span>
+                      Ready · {formatBytes(f.file.size)}
+                    </div>
+                  </div>
                   <select
-                    id={`type-${f.id}`}
-                    className="filter-bar__select"
+                    aria-label="Document type"
+                    className="file-row__select"
                     value={f.type}
                     onChange={(e) => setFileType(f.id, e.target.value)}
                     disabled={analyzing}
@@ -218,31 +229,31 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
                       </option>
                     ))}
                   </select>
-                </div>
-                <button
-                  type="button"
-                  className="btn btn--ghost file-row__remove"
-                  onClick={() => removeFile(f.id)}
-                  disabled={analyzing}
-                  aria-label={`Remove ${f.file.name}`}
-                  title="Remove file"
-                >
-                  ✕
-                </button>
-              </li>
-            ))}
+                  <button
+                    type="button"
+                    className="file-row__remove"
+                    onClick={() => removeFile(f.id)}
+                    disabled={analyzing}
+                    aria-label={`Remove ${f.file.name}`}
+                    title="Remove file"
+                  >
+                    <span
+                      className="material-symbols-outlined"
+                      aria-hidden="true"
+                      style={{ fontSize: 18 }}
+                    >
+                      close
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
-        ) : null}
-
-        {hasSupporting ? (
-          <div className="muted file-list__note">
-            Supporting documents can be kept in the queue, but verification uses one COA and one material label.
-          </div>
         ) : null}
 
         {!uploadEnabled ? (
           <div className="banner banner--info" style={{ marginTop: 12 }}>
-            Upload is not available in this environment. Sample cases are available for review.
+            Upload is not available in this environment. Sample cases remain available for review.
           </div>
         ) : validationMessage ? (
           <div
@@ -261,47 +272,49 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
           </div>
         ) : null}
 
-        <div
-          className="row"
-          style={{ justifyContent: "flex-end", gap: 10, marginTop: 14 }}
-        >
-          <button
-            type="button"
-            className="btn"
-            onClick={clearAll}
-            disabled={files.length === 0 || analyzing}
-          >
-            Clear
-          </button>
-          <button
-            type="button"
-            className="btn btn--primary"
-            disabled={!uploadEnabled || !ready || analyzing}
-            onClick={handleAnalyze}
-            title={
-              !uploadEnabled
-                ? "Real upload is disabled"
-                : !ready
-                ? "Assign one COA and one Material Label"
-                : "Run verification"
-            }
-          >
-            {analyzing ? "Verifying…" : "Run verification"}
-          </button>
+        <div className="upload-actions">
+          <div className="upload-actions__status">
+            {ready && !tooMany ? (
+              <>
+                <span
+                  className="material-symbols-outlined upload-actions__icon upload-actions__icon--ok"
+                  aria-hidden="true"
+                >
+                  check_circle
+                </span>
+                Requirements met (1 COA, 1 Material Label)
+              </>
+            ) : files.length === 0 ? (
+              <>
+                <span
+                  className="material-symbols-outlined upload-actions__icon"
+                  aria-hidden="true"
+                >
+                  info
+                </span>
+                Add a COA and a Material Label to enable verification.
+              </>
+            ) : null}
+          </div>
+          <div className="row" style={{ gap: 10 }}>
+            <button
+              type="button"
+              className="btn"
+              onClick={clearAll}
+              disabled={files.length === 0 || analyzing}
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              className="btn btn--primary"
+              disabled={!uploadEnabled || !ready || analyzing}
+              onClick={handleAnalyze}
+            >
+              {analyzing ? "Verifying…" : "Run verification"}
+            </button>
+          </div>
         </div>
-      </div>
-
-      <div className="card__footer card__footer--stacked">
-        <p>
-          - VeriTrace compares uploaded documents with approved material specs and
-          supplier records.
-        </p>
-        <p>
-          - Complete verification requires one COA and one Material Label.
-        </p>
-        <p>
-          - Future workflows may support partial screening and additional document types.
-        </p>
       </div>
     </section>
   );

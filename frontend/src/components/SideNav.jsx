@@ -57,12 +57,9 @@ export default function SideNav({
         aria-hidden={!open}
       >
         <div className="sidenav__top">
-          <div className="sidenav__brand">
-            <div className="sidenav__brand-mark">VT</div>
-            <div>
-              <div className="sidenav__brand-name">VeriTrace</div>
-              <div className="sidenav__brand-tag">Material Verification Copilot</div>
-            </div>
+          <div>
+            <div className="sidenav__section-title">QA Operations</div>
+            <div className="sidenav__section-sub">Material Verification</div>
           </div>
           <button
             type="button"
@@ -77,18 +74,7 @@ export default function SideNav({
           </button>
         </div>
 
-        <div>
-          <div className="sidenav__section-label">QA Operations</div>
-          <div
-            style={{
-              fontSize: 11,
-              color: "var(--c-outline)",
-              padding: "0 24px 8px",
-              marginTop: -4,
-            }}
-          >
-            Institutional Grade Verification
-          </div>
+        <div className="sidenav__primary">
           <nav className="sidenav__nav" aria-label="Primary">
             {items.map((it) => (
               <button
@@ -109,18 +95,11 @@ export default function SideNav({
         </div>
 
         <div className="sidenav__meta">
-          <div className="sidenav__meta-pill" title="Deterministic decision engine">
-            <span className="sidenav__meta-pill-dot" aria-hidden="true" />
-            Deterministic engine
-          </div>
-          <div className="sidenav__section-label" style={{ paddingTop: 8 }}>
-            Resources
-          </div>
           <nav className="sidenav__nav" aria-label="Secondary">
             <button
               type="button"
               className={
-                "sidenav__item" +
+                "sidenav__item sidenav__item--secondary" +
                 (current === "help" ? " sidenav__item--active" : "")
               }
               onClick={() => {
@@ -134,29 +113,15 @@ export default function SideNav({
             </button>
             <button
               type="button"
-              className="sidenav__item"
+              className="sidenav__item sidenav__item--secondary"
               disabled
-              title="Authentication backend integration pending"
-              style={{ opacity: 0.55, cursor: "not-allowed" }}
+              title="Account management pending"
             >
               <MIcon name="logout" />
               <span>Sign Out</span>
-              <span style={{
-                marginLeft: "auto",
-                fontSize: 9,
-                fontWeight: 700,
-                letterSpacing: 0.5,
-                textTransform: "uppercase",
-                color: "var(--c-nav-text-soft)",
-              }}>In dev</span>
+              <span className="sidenav__item-hint">In dev</span>
             </button>
           </nav>
-          <div className="sidenav__footer" style={{ marginTop: 8 }}>
-            VeriTrace · Material Verification Copilot
-            <div style={{ marginTop: 2, opacity: 0.8 }}>
-              Institutional-grade verification
-            </div>
-          </div>
         </div>
       </aside>
     </>

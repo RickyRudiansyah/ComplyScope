@@ -4,72 +4,68 @@ import Spinner from "../components/Spinner.jsx";
 import { api } from "../api.js";
 
 const PIPELINE_STEPS = [
-  {
-    label: "Upload",
-    sub: "Ingest COA / label",
-    icon: (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-        <polyline points="17 8 12 3 7 8" />
-        <line x1="12" y1="3" x2="12" y2="15" />
-      </svg>
-    ),
-  },
-  {
-    label: "Extract",
-    sub: "Parse fields",
-    icon: (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-        <line x1="8" y1="13" x2="16" y2="13" />
-        <line x1="8" y1="17" x2="13" y2="17" />
-      </svg>
-    ),
-  },
-  {
-    label: "Compare",
-    sub: "Check master data",
-    icon: (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="17 1 21 5 17 9" />
-        <path d="M3 11V9a4 4 0 0 1 4-4h14" />
-        <polyline points="7 23 3 19 7 15" />
-        <path d="M21 13v2a4 4 0 0 1-4 4H3" />
-      </svg>
-    ),
-  },
-  {
-    label: "Score",
-    sub: "Calculate risk",
-    icon: (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 3v18h18" />
-        <polyline points="7 14 12 9 16 13 21 8" />
-      </svg>
-    ),
-  },
-  {
-    label: "Explain",
-    sub: "Generate narrative",
-    icon: (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-    ),
-  },
-  {
-    label: "Save",
-    sub: "Audit log entry",
-    icon: (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-        <polyline points="17 21 17 13 7 13 7 21" />
-        <polyline points="7 3 7 8 15 8" />
-      </svg>
-    ),
-  },
+  { label: "Upload", sub: "Ingest COA / label", icon: "upload_file" },
+  { label: "Extract", sub: "Parse entities", icon: "text_fields" },
+  { label: "Compare", sub: "Check master data", icon: "compare_arrows" },
+  { label: "Score", sub: "Calculate risk", icon: "score" },
+  { label: "Explain", sub: "Generate narrative", icon: "psychology" },
+  { label: "Save", sub: "Audit log entry", icon: "save" },
 ];
+
+/**
+ * Maps GET /health response fields to the Service Status cards.
+ *
+ * Backend contract (backend/schemas.py · HealthResponse):
+ *   status                    → API readiness ("ok" or other)
+ *   service                   → service name (display only)
+ *   doc_intel_configured      → Azure Document Intelligence configured (extraction)
+ *   azure_openai_configured   → Azure OpenAI / explanation provider configured
+ *
+ * Items without a /health field show "Backend integration pending" so we
+ * never fabricate a live state we can't observe.
+ */
+function buildServices(health) {
+  const apiOk = health?.status === "ok";
+  const extractionOk = !!health?.doc_intel_configured;
+  const explanationOk = !!health?.azure_openai_configured;
+  return [
+    {
+      icon: "rule",
+      label: "Extraction Engine",
+      status: extractionOk ? "Operational" : "Not configured",
+      ok: extractionOk,
+      hint: "Azure Document Intelligence (doc_intel_configured)",
+    },
+    {
+      icon: "table_chart",
+      label: "Master Data",
+      status: apiOk ? "Connected" : "Unavailable",
+      ok: apiOk,
+      hint: "API status (/health.status)",
+    },
+    {
+      icon: "analytics",
+      label: "Risk Engine",
+      status: apiOk ? "Operational" : "Unavailable",
+      ok: apiOk,
+      hint: "Deterministic, runs in process",
+    },
+    {
+      icon: "shield",
+      label: "Audit Service",
+      status: apiOk ? "Recording" : "Unavailable",
+      ok: apiOk,
+      hint: "API status (/health.status)",
+    },
+    {
+      icon: "psychology",
+      label: "Explanation Provider",
+      status: explanationOk ? "Configured" : "Template fallback",
+      ok: explanationOk,
+      hint: "Azure OpenAI (azure_openai_configured)",
+    },
+  ];
+}
 
 export default function SettingsPage() {
   const [health, setHealth] = useState(null);
@@ -89,74 +85,7 @@ export default function SettingsPage() {
     };
   }, []);
 
-  const apiOk = health?.status === "ok";
-  const docIntelOk = !!health?.doc_intel_configured;
-
-  const services = [
-    {
-      label: "API",
-      status: apiOk ? "Online" : "Offline",
-      ok: apiOk ? "ok" : "bad",
-      icon: (
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M5 12h14M5 6h14M5 18h14" />
-        </svg>
-      ),
-    },
-    {
-      label: "Service",
-      status: health?.service || "—",
-      ok: apiOk ? "ok" : "warn",
-      icon: (
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="4" width="18" height="6" rx="1" />
-          <rect x="3" y="14" width="18" height="6" rx="1" />
-        </svg>
-      ),
-    },
-    {
-      label: "Azure Document Intelligence",
-      status: docIntelOk ? "Connected" : "Not configured",
-      ok: docIntelOk ? "ok" : "warn",
-      icon: (
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <polyline points="14 2 14 8 20 8" />
-        </svg>
-      ),
-    },
-    {
-      label: "LLM explanation provider",
-      status: "GitHub Models",
-      ok: "ok",
-      icon: (
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.4-3.4-1.4-.5-1.2-1.2-1.5-1.2-1.5-.9-.6.1-.6.1-.6 1 .1 1.6 1.1 1.6 1.1.9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.7-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0 0 12 2z" />
-        </svg>
-      ),
-    },
-    {
-      label: "Decision engine",
-      status: "Deterministic",
-      ok: "ok",
-      icon: (
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="9" />
-          <path d="M9 12l2 2 4-4" />
-        </svg>
-      ),
-    },
-    {
-      label: "Audit service",
-      status: "Recording",
-      ok: "ok",
-      icon: (
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 3l8 4v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4z" />
-        </svg>
-      ),
-    },
-  ];
+  const services = buildServices(health);
 
   return (
     <div className="stack settings-page">
@@ -184,7 +113,7 @@ export default function SettingsPage() {
           <div>
             <h3 className="card__title">Service status</h3>
             <p className="card__subtitle">
-              Live readiness signals for the backend and document integrations.
+              Readiness signals derived from the <code>/health</code> endpoint.
             </p>
           </div>
         </div>
@@ -196,15 +125,25 @@ export default function SettingsPage() {
           ) : (
             <div className="svc-grid">
               {services.map((s) => (
-                <div key={s.label} className={`svc-card svc-card--${s.ok}`}>
-                  <div className="svc-card__icon" aria-hidden="true">
-                    {s.icon}
+                <div
+                  key={s.label}
+                  className={`svc-card ${s.ok ? "svc-card--ok" : "svc-card--warn"}`}
+                  title={s.hint}
+                >
+                  <div
+                    className={`svc-card__tile ${s.ok ? "svc-card__tile--ok" : "svc-card__tile--warn"}`}
+                    aria-hidden="true"
+                  >
+                    <span className="material-symbols-outlined">{s.icon}</span>
                   </div>
-                  <div style={{ minWidth: 0 }}>
+                  <div className="svc-card__main">
                     <div className="svc-card__label">{s.label}</div>
                     <div className="svc-card__status">
-                      {s.status}
-                      <span className="svc-card__dot" aria-hidden="true" />
+                      <span>{s.status}</span>
+                      <span
+                        className={`svc-card__dot ${s.ok ? "svc-card__dot--ok" : "svc-card__dot--warn"}`}
+                        aria-hidden="true"
+                      />
                     </div>
                   </div>
                 </div>
@@ -214,22 +153,29 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <div className="card">
+      <div className="card pipeline-card">
         <div className="card__header">
-          <div>
+          <div className="row" style={{ gap: 8 }}>
+            <span
+              className="material-symbols-outlined"
+              aria-hidden="true"
+              style={{ fontSize: 20, color: "var(--c-secondary)" }}
+            >
+              account_tree
+            </span>
             <h3 className="card__title">Verification pipeline</h3>
-            <p className="card__subtitle">
-              How a document pair becomes a reviewable decision.
-            </p>
           </div>
+          <p className="card__subtitle">
+            How a document set becomes a reviewable verification record.
+          </p>
         </div>
         <div className="card__body">
           <div className="pipeline">
             {PIPELINE_STEPS.map((p, i) => (
               <Fragment key={p.label}>
                 <div className="pipeline__step">
-                  <div className="pipeline__icon" aria-hidden="true">
-                    {p.icon}
+                  <div className="pipeline__circle" aria-hidden="true">
+                    <span className="material-symbols-outlined">{p.icon}</span>
                   </div>
                   <div className="pipeline__label">{p.label}</div>
                   <div className="pipeline__sub">{p.sub}</div>
@@ -253,44 +199,48 @@ export default function SettingsPage() {
               </p>
             </div>
           </div>
-          <div className="card__body help">
-            <p style={{ marginTop: 0 }}>
-              The system calculates an aggregate score based on found
-              discrepancies. Lower scores indicate higher confidence. Risk score
-              = sum of finding scores, capped at <strong>100</strong>.
+          <div className="card__body">
+            <p className="settings-intro">
+              Risk score is the capped sum of deterministic finding weights.
+              Lower scores indicate higher confidence in the verification record.
             </p>
 
-            <div className="score-chips" style={{ marginTop: 14 }}>
-              <div className="score-chip score-chip--low">
-                <span className="score-chip__range">0 – 20</span>
-                <span>Auto-Approve eligible. High confidence match.</span>
+            <div className="score-bands">
+              <div className="score-band score-band--low">
+                <span className="score-band__range">0 – 20</span>
+                <span className="score-band__desc">
+                  Auto-approve eligible. High-confidence match.
+                </span>
               </div>
-              <div className="score-chip score-chip--med">
-                <span className="score-chip__range">21 – 59</span>
-                <span>Manual Review Required. Moderate risk flagged.</span>
+              <div className="score-band score-band--med">
+                <span className="score-band__range">21 – 59</span>
+                <span className="score-band__desc">
+                  Manual QA review required. Moderate risk flagged.
+                </span>
               </div>
-              <div className="score-chip score-chip--high">
-                <span className="score-chip__range">60 – 100</span>
-                <span>Auto-Reject recommended. Critical mismatch detected.</span>
+              <div className="score-band score-band--high">
+                <span className="score-band__range">60 – 100</span>
+                <span className="score-band__desc">
+                  Auto-reject recommended. Critical mismatch detected.
+                </span>
               </div>
             </div>
 
-            <div className="callout callout--accent" style={{ marginTop: 14 }}>
-              <div className="callout__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="9" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12" y2="16.01" />
-                </svg>
-              </div>
+            <div className="callout callout--accent" style={{ marginTop: 16 }}>
+              <span
+                className="material-symbols-outlined callout__mi"
+                aria-hidden="true"
+              >
+                info
+              </span>
               <div>
-                <div className="callout__title">Transparency Note</div>
+                <div className="callout__title">Transparency note</div>
                 <div className="callout__body">
-                  The scoring matrix is a configurable prototype heuristic
-                  designed to surface risk. A <strong>CRITICAL</strong>{" "}
-                  <code>TEST_RESULT_OUT_OF_SPEC</code> finding forces REJECTED
-                  regardless of total score. Final release decisions remain
-                  with authorized QA personnel.
+                  The scoring matrix is configurable and deterministic. A
+                  CRITICAL <code>TEST_RESULT_OUT_OF_SPEC</code> finding forces
+                  REJECTED regardless of total score. The LLM only summarises
+                  findings — it does not set the final decision. Material
+                  release decisions remain with authorized QA personnel.
                 </div>
               </div>
             </div>

@@ -46,9 +46,9 @@ export default function SampleCasesPanel({
     <section className="card">
       <div className="card__header">
         <div>
-          <h3 className="card__title">Sample cases</h3>
+          <h3 className="card__title">Try sample cases</h3>
           <p className="card__subtitle">
-            Common verification outcomes built from included sample records.
+            Curated synthetic scenarios for QA review and reference.
           </p>
         </div>
       </div>
@@ -65,19 +65,25 @@ export default function SampleCasesPanel({
               const copy = SCENARIO_COPY[s.scenario_id] || {};
               const title = copy.title || s.title;
               const description = copy.description || s.description;
+              const isRunning = runningId === s.scenario_id;
               return (
-                <li key={s.scenario_id} className="sample-item">
-                  <div>
-                    <div className="sample-item__title">{title}</div>
-                    <div className="sample-item__desc">{description}</div>
-                  </div>
+                <li key={s.scenario_id}>
                   <button
                     type="button"
-                    className="btn"
+                    className="sample-item"
                     onClick={() => onRun?.(s.scenario_id)}
-                    disabled={runningId === s.scenario_id}
+                    disabled={isRunning}
                   >
-                    {runningId === s.scenario_id ? "Running…" : "Try"}
+                    <div className="sample-item__main">
+                      <div className="sample-item__title">{title}</div>
+                      <div className="sample-item__desc">{description}</div>
+                    </div>
+                    <span
+                      className="material-symbols-outlined sample-item__arrow"
+                      aria-hidden="true"
+                    >
+                      {isRunning ? "progress_activity" : "arrow_forward"}
+                    </span>
                   </button>
                 </li>
               );
