@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "description": "Table header alias dictionary used by the parser to normalize column headers in the Results of Analysis table on COA documents into canonical column names.",
+  "aliases": {
+    "parameter": ["Parameter", "Test", "Analysis", "Test Item"],
+    "method": ["Method", "Test Method", "Procedure"],
+    "specification": ["Specification", "Limit", "Acceptance Criteria", "Requirement"],
+    "result": ["Result", "Results", "Actual", "Observed Value"],
+    "unit": ["Unit", "UOM"],
+    "status": ["Status", "Pass/Fail", "Conclusion"]
+  }
+}

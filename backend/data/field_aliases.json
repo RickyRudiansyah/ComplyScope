@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "description": "Field-level alias dictionary used by the parser to normalize header/label variations found on COA and material label documents into canonical field names.",
+  "aliases": {
+    "batch_no": ["Batch No", "Batch Number", "Lot No", "Lot Number", "Batch/Lot"],
+    "expiry_date": ["Expiry Date", "Expiration Date", "Retest Date", "Valid Until"],
+    "material_name": ["Product Name", "Material Name", "Description", "Product Description"],
+    "supplier": ["Supplier", "Vendor"],
+    "manufacturer": ["Manufacturer", "Manufacturing Site", "Produced By", "Mfg Site"],
+    "coa_no": ["COA No", "Certificate No", "Certificate Number"]
+  }
+}

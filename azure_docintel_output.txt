@@ -1,0 +1,73 @@
+4/27/26, 10:18 PM
+COA - Paracetamol API - PCM-2026-999
+CERTIFICATE OF ANALYSIS
+PT Sumber Farma Kimia - Quality Assurance Department
+COA No:
+COA-PCM-2026-002
+Issue Date:
+2026-04-22
+Page:
+1 of 1
+Document Type:
+Certificate of Analysis
+Product Information
+Product Name:
+Paracetamol API
+Material Code:
+MAT-PCM-001
+Category:
+API
+Batch No:
+PCM-2026-999
+Supplier:
+PT Sumber
+Farma Kimia
+Manufacturer:
+PT Sumber Farma Kimia
+Manufacturing Site
+MFG Date:
+2026-01-15
+Expiry Date:
+2027-03-31
+Quantity:
+100 kg
+Storage Condition:
+Keep dry, below 25℃
+Results of Analysis
+Parameter
+Method
+Specification
+Result
+Unit
+Status
+Appearance
+Visual
+White crystalline powder
+White crystalline powder
+-
+PASS
+Identification
+FTIR
+Positive
+Positive
+-
+PASS
+Assay
+HPLC
+98.0 - 102.0
+99.1
+%
+PASS
+Moisture
+LOD
+≤ 0.5
+0.24
+%
+PASS
+Conclusion: The batch complies with the defined material specification.
+Authorized By: QA Authorized Person
+Signature:
+Date: 2026-04-22
+Synthetic document - VeriTrace demo dataset. Not a real commercial COA.
+127.0.0.1:5500/datasets/demo_docs/batch_mismatch/coa_batch_mismatch.html
+1/1

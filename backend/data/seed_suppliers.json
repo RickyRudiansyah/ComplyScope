@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0",
+  "description": "Synthetic approved supplier list and material-supplier mapping. All names are fictitious and used only for the VeriTrace Lite demo.",
+  "suppliers": [
+    {
+      "supplier_code": "SUP-SFK-001",
+      "supplier_name": "PT Sumber Farma Kimia",
+      "country": "Indonesia",
+      "status": "APPROVED",
+      "notes": "Synthetic supplier. Primary demo approved manufacturer."
+    },
+    {
+      "supplier_code": "SUP-FNS-002",
+      "supplier_name": "PT Farma Nusantara",
+      "country": "Indonesia",
+      "status": "APPROVED",
+      "notes": "Synthetic supplier. Secondary approved alternative."
+    },
+    {
+      "supplier_code": "SUP-GCT-003",
+      "supplier_name": "PT Global Chemical Trading",
+      "country": "Indonesia",
+      "status": "NOT_APPROVED",
+      "notes": "Synthetic supplier used to demonstrate SUPPLIER_NOT_APPROVED scenario."
+    }
+  ],
+  "material_suppliers": [
+    {
+      "material_code": "MAT-PCM-001",
+      "supplier_code": "SUP-SFK-001",
+      "supplier_name": "PT Sumber Farma Kimia",
+      "status": "APPROVED"
+    },
+    {
+      "material_code": "MAT-PCM-001",
+      "supplier_code": "SUP-FNS-002",
+      "supplier_name": "PT Farma Nusantara",
+      "status": "APPROVED"
+    },
+    {
+      "material_code": "MAT-PCM-001",
+      "supplier_code": "SUP-GCT-003",
+      "supplier_name": "PT Global Chemical Trading",
+      "status": "NOT_APPROVED"
+    }
+  ]
+}

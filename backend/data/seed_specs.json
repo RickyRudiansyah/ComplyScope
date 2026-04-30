@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "description": "Generic per-material quality specification list. Required tests are defined per material_code. The validator must load these specs and compare each required parameter against COA test_results[]. Do not assume Assay is the only or universal required test.",
+  "spec_types": {
+    "range": "Numeric value must be within [spec_min, spec_max] inclusive.",
+    "max": "Numeric value must be less than or equal to spec_max.",
+    "min": "Numeric value must be greater than or equal to spec_min.",
+    "text_equals": "Text value must match expected_text (case-insensitive, trimmed).",
+    "positive": "Qualitative test where result must indicate a positive outcome (e.g., 'Positive', 'Conforms')."
+  },
+  "specs": [
+    {
+      "material_code": "MAT-PCM-001",
+      "parameter": "Appearance",
+      "method": "Visual",
+      "spec_type": "text_equals",
+      "spec_min": null,
+      "spec_max": null,
+      "expected_text": "White crystalline powder",
+      "unit": "-",
+      "required": true,
+      "criticality": "MEDIUM",
+      "aliases": ["Appearance", "Description"]
+    },
+    {
+      "material_code": "MAT-PCM-001",
+      "parameter": "Identification",
+      "method": "FTIR",
+      "spec_type": "text_equals",
+      "spec_min": null,
+      "spec_max": null,
+      "expected_text": "Positive",
+      "unit": "-",
+      "required": true,
+      "criticality": "HIGH",
+      "aliases": ["Identification", "ID Test"]
+    },
+    {
+      "material_code": "MAT-PCM-001",
+      "parameter": "Assay",
+      "method": "HPLC",
+      "spec_type": "range",
+      "spec_min": 98.0,
+      "spec_max": 102.0,
+      "expected_text": null,
+      "unit": "%",
+      "required": true,
+      "criticality": "CRITICAL",
+      "aliases": ["Assay", "Purity", "Content", "Potency"]
+    },
+    {
+      "material_code": "MAT-PCM-001",
+      "parameter": "Moisture",
+      "method": "LOD",
+      "spec_type": "max",
+      "spec_min": null,
+      "spec_max": 0.5,
+      "expected_text": null,
+      "unit": "%",
+      "required": true,
+      "criticality": "HIGH",
+      "aliases": ["Moisture", "Water Content", "LOD"]
+    }
+  ]
+}
