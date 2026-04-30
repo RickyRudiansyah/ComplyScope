@@ -69,8 +69,7 @@ export default function VerifyPage({ uploadEnabled = false, onVerified }) {
         <div>
           <div className="info-tile__title">Verification requirements</div>
           <div className="info-tile__hint">
-            A verification record requires exactly one Certificate of Analysis
-            and one Material Label.
+            Complete verification requires one Certificate of Analysis and one Material Label for document-to-document consistency checks.
           </div>
         </div>
       </div>

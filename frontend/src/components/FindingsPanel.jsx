@@ -50,7 +50,7 @@ function severityClass(s) {
 }
 
 function renderEvidenceValue(value) {
-  if (value === null || value === undefined) return "—";
+  if (value === null || value === undefined) return "-";
   if (Array.isArray(value)) return value.join(", ");
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
@@ -83,9 +83,7 @@ export default function FindingsPanel({ findings, riskScore }) {
       {findings.map((f, i) => {
         const friendly = FRIENDLY_TYPE[f.type] || f.type;
         const evidenceEntries = f.evidence
-          ? Object.entries(f.evidence).filter(
-              ([k]) => k !== undefined
-            )
+          ? Object.entries(f.evidence).filter(([k]) => k !== undefined)
           : [];
         return (
           <article key={`${f.type}-${i}`} className={severityClass(f.severity)}>
@@ -93,9 +91,7 @@ export default function FindingsPanel({ findings, riskScore }) {
               <div className="row" style={{ gap: 8 }}>
                 <span className="finding__type">{friendly}</span>
                 {f.parameter ? (
-                  <span className="badge badge--neutral">
-                    {f.parameter}
-                  </span>
+                  <span className="badge badge--neutral">{f.parameter}</span>
                 ) : null}
               </div>
               <div className="row" style={{ gap: 8 }}>

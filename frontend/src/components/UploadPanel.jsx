@@ -32,11 +32,13 @@ function inferType(filename) {
 }
 
 function nextId() {
-  return `f-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  return `f-${Date.now().toString(36)}-${Math.random()
+    .toString(36)
+    .slice(2, 8)}`;
 }
 
 function formatBytes(bytes) {
-  if (!Number.isFinite(bytes) || bytes <= 0) return "—";
+  if (!Number.isFinite(bytes) || bytes <= 0) return "-";
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -91,11 +93,13 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
     e.stopPropagation();
     if (!dragActive) setDragActive(true);
   }
+
   function onDragLeave(e) {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
   }
+
   function onDrop(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -105,13 +109,14 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
 
   const counts = useMemo(() => {
     // const c = { COA: 0, LABEL: 0, SUPPORTING: 0, IGNORE: 0 };
-    const c = { COA: 0, LABEL: 0, SUPPORTING: 0};
+    const c = { COA: 0, LABEL: 0, SUPPORTING: 0 };
     for (const f of files) c[f.type] = (c[f.type] || 0) + 1;
     return c;
   }, [files]);
 
   const ready = counts.COA === 1 && counts.LABEL === 1;
   const tooMany = counts.COA > 1 || counts.LABEL > 1;
+  const hasSupporting = counts.SUPPORTING > 0;
 
   let validationMessage = null;
   if (files.length > 0) {
@@ -119,8 +124,13 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
       validationMessage =
         "Only one COA and one Material Label can be analyzed at a time.";
     } else if (!ready) {
-      validationMessage =
-        "Assign one file as COA and one as Material Label to continue.";
+      if (hasSupporting) {
+        validationMessage =
+          "Supporting documents are not analyzed or saved in this version.\nAssign one file as COA and one as Material Label to continue.";
+      } else {
+        validationMessage =
+          "Assign one file as COA and one as Material Label to continue.";
+      }
     }
   }
 
@@ -146,7 +156,8 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
         <div>
           <h3 className="card__title">Upload documents</h3>
           <p className="card__subtitle">
-            Attach a Certificate of Analysis and a Material Label, then run verification.
+            Attach a Certificate of Analysis and a Material Label, then run
+            verification.
           </p>
         </div>
       </div>
@@ -177,9 +188,7 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
             upload_file
           </span>
           <p className="upload-drop__title">Drag &amp; drop files here</p>
-          <p className="upload-drop__hint">
-            or click to browse (PDF, PNG, JPG)
-          </p>
+          <p className="upload-drop__hint">or click to browse (PDF, PNG, JPG)</p>
           <input
             ref={inputRef}
             type="file"
@@ -253,12 +262,14 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
 
         {!uploadEnabled ? (
           <div className="banner banner--info" style={{ marginTop: 12 }}>
-            Upload is not available in this environment. Sample cases remain available for review.
+            Upload is not available in this environment. Sample cases remain
+            available for review.
           </div>
         ) : validationMessage ? (
           <div
             className={
-              "banner " + (tooMany ? "banner--warn" : "banner--info")
+              "banner text-block-preserve-lines " +
+              (tooMany ? "banner--warn" : "banner--info")
             }
             style={{ marginTop: 12 }}
           >
@@ -292,7 +303,7 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
                 >
                   info
                 </span>
-                Add a COA and a Material Label to enable verification.
+                Add documents to enable verification.
               </>
             ) : null}
           </div>
@@ -311,7 +322,7 @@ export default function UploadPanel({ uploadEnabled = false, onAnalyze }) {
               disabled={!uploadEnabled || !ready || analyzing}
               onClick={handleAnalyze}
             >
-              {analyzing ? "Verifying…" : "Run verification"}
+              {analyzing ? "Verifying..." : "Run verification"}
             </button>
           </div>
         </div>

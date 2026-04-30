@@ -37,7 +37,7 @@ export default function MasterDataPanel({ material, loading, error }) {
     return (
       <EmptyState
         title="Select a material"
-        hint="Choose a material from the list to see its specifications and approved suppliers."
+        hint="Choose a material from the list to see its specifications and supplier approval records."
       />
     );
   }
@@ -126,14 +126,14 @@ export default function MasterDataPanel({ material, loading, error }) {
       <div className="card masterdata-suppliers-card">
         <div className="card__header">
           <div>
-            <h3 className="card__title">Approved suppliers</h3>
+            <h3 className="card__title">Supplier approval status</h3>
             <p className="card__subtitle">
-              Suppliers approved for this material.
+              Supplier-material status records returned for this material.
             </p>
           </div>
         </div>
         <div className="card__body" style={{ padding: 0 }}>
-          {material.approved_suppliers?.length ? (
+          {material.supplier_statuses?.length ? (
             <table className="table">
               <thead>
                 <tr>
@@ -142,7 +142,7 @@ export default function MasterDataPanel({ material, loading, error }) {
                 </tr>
               </thead>
               <tbody>
-                {material.approved_suppliers.map((s) => (
+                {material.supplier_statuses.map((s) => (
                   <tr key={s.supplier_name}>
                     <td>{s.supplier_name}</td>
                     <td>
@@ -153,7 +153,7 @@ export default function MasterDataPanel({ material, loading, error }) {
               </tbody>
             </table>
           ) : (
-            <div className="empty">No approved suppliers configured.</div>
+            <div className="empty">No supplier status records configured.</div>
           )}
         </div>
       </div>

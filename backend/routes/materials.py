@@ -4,7 +4,13 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 
 from backend.database import db_session
-from backend.schemas import ApprovedSupplier, MaterialBase, MaterialDetail, MaterialSpec
+from backend.schemas import (
+    ApprovedSupplier,
+    MaterialBase,
+    MaterialDetail,
+    MaterialSpec,
+    MaterialSupplierStatus,
+)
 
 router = APIRouter(prefix="/materials", tags=["materials"])
 
@@ -73,7 +79,7 @@ def get_material(code: str) -> MaterialDetail:
 
         supplier_rows = conn.execute(
             "SELECT supplier_name, status FROM material_suppliers "
-            "WHERE material_code = ? AND status = 'APPROVED' "
+            "WHERE material_code = ? "
             "ORDER BY supplier_name",
             (code,),
         ).fetchall()
@@ -84,6 +90,13 @@ def get_material(code: str) -> MaterialDetail:
         specs=[_row_to_spec(r) for r in spec_rows],
         approved_suppliers=[
             ApprovedSupplier(supplier_name=r["supplier_name"], status=r["status"])
+            for r in supplier_rows
+            if str(r["status"]).upper() == "APPROVED"
+        ],
+        supplier_statuses=[
+            MaterialSupplierStatus(
+                supplier_name=r["supplier_name"], status=r["status"]
+            )
             for r in supplier_rows
         ],
     )

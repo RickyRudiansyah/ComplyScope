@@ -12,6 +12,39 @@ const PIPELINE_STEPS = [
   { label: "Save", sub: "Audit log entry", icon: "save" },
 ];
 
+const WORK_STEPS = [
+  {
+    icon: "text_fields",
+    title: "Extract fields",
+    desc: "Pull material name, batch, supplier, and key analytical results from the COA and material label.",
+  },
+  {
+    icon: "compare_arrows",
+    title: "Compare documents",
+    desc: "Match extracted values against approved master data and the active material specification.",
+  },
+  {
+    icon: "rule",
+    title: "Generate findings",
+    desc: "Flag every discrepancy with a clear severity so reviewers see the exact reason for review.",
+  },
+  {
+    icon: "speed",
+    title: "Score risk",
+    desc: "Aggregate findings into a deterministic risk score and a band — Low, Medium, or High.",
+  },
+  {
+    icon: "psychology",
+    title: "Explain result",
+    desc: "Produce a plain-language summary of the outcome — Approved, Needs Review, or Rejected.",
+  },
+  {
+    icon: "shield",
+    title: "Save audit trail",
+    desc: "Record the verification with full evidence so QA and auditors can review it later.",
+  },
+];
+
 /**
  * Maps GET /health response fields to the Service Status cards.
  *
@@ -59,8 +92,8 @@ function buildServices(health) {
     },
     {
       icon: "psychology",
-      label: "Explanation Provider",
-      status: explanationOk ? "Configured" : "Template fallback",
+      label: "Explanation Servicer",
+      status: explanationOk ? "Configured" : "Available",
       ok: explanationOk,
       hint: "Azure OpenAI (azure_openai_configured)",
     },
@@ -97,13 +130,10 @@ export default function SettingsPage() {
         </div>
         <div>
           <div className="callout__title">
-            Deterministic decision engine · LLM explains, does not decide
+            Deterministic decision engine <br />· AI explains, QA decides
           </div>
           <div className="callout__body">
-            VeriTrace calculates risk and decision deterministically from
-            validation findings. The LLM only generates plain-language
-            explanations of findings — it does not set status. Final material
-            release decisions remain with authorized QA personnel.
+            VeriTrace calculates findings, risk score, and verification status using deterministic rules. AI-generated explanations summarize the findings only, they do not determine the decision. Final material release remains under authorized QA responsibility.
           </div>
         </div>
       </div>
@@ -113,7 +143,7 @@ export default function SettingsPage() {
           <div>
             <h3 className="card__title">Service status</h3>
             <p className="card__subtitle">
-              Readiness signals derived from the <code>/health</code> endpoint.
+              Service readiness signals.
             </p>
           </div>
         </div>
@@ -186,12 +216,50 @@ export default function SettingsPage() {
               </Fragment>
             ))}
           </div>
+
+          <details className="toggle-block">
+            <summary className="toggle-block__summary">
+              <svg
+                className="toggle-block__chev"
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="9 6 15 12 9 18" />
+              </svg>
+              View step details
+            </summary>
+            <div className="toggle-block__body">
+              <div className="work-flow">
+                {WORK_STEPS.map((s, i) => (
+                  <div key={s.title} className="work-step">
+                    <div className="work-step__icon" aria-hidden="true">
+                      <span className="material-symbols-outlined">{s.icon}</span>
+                    </div>
+                    <div className="work-step__main">
+                      <div className="work-step__num">
+                        Step {String(i + 1).padStart(2, "0")}
+                      </div>
+                      <div className="work-step__title">{s.title}</div>
+                      <div className="work-step__desc">{s.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </details>
         </div>
       </div>
 
       <div className="settings-grid">
         <div className="card">
-          <div className="card__header">
+          <div className="card__header card__header--divided">
             <div>
               <h3 className="card__title">Decision and risk scoring</h3>
               <p className="card__subtitle">
@@ -226,7 +294,9 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div className="callout callout--accent" style={{ marginTop: 16 }}>
+            <hr className="settings-divider" />
+
+            <div className="callout callout--accent">
               <span
                 className="material-symbols-outlined callout__mi"
                 aria-hidden="true"
@@ -236,11 +306,7 @@ export default function SettingsPage() {
               <div>
                 <div className="callout__title">Transparency note</div>
                 <div className="callout__body">
-                  The scoring matrix is configurable and deterministic. A
-                  CRITICAL <code>TEST_RESULT_OUT_OF_SPEC</code> finding forces
-                  REJECTED regardless of total score. The LLM only summarises
-                  findings — it does not set the final decision. Material
-                  release decisions remain with authorized QA personnel.
+                  The scoring matrix is deterministic and configurable. Critical out-of-spec test results automatically lead to a rejected verification decision, regardless of total score. This includes critical <code>TEST_RESULT_OUT_OF_SPEC</code> findings. AI-generated explanations summarize findings only; they do not determine the decision. Final material release remains the responsibility of authorized QA personnel.
                 </div>
               </div>
             </div>
@@ -248,29 +314,67 @@ export default function SettingsPage() {
         </div>
 
         <div className="card">
-          <div className="card__header">
+          <div className="card__header card__header--divided">
             <div>
               <h3 className="card__title">Finding weights</h3>
               <p className="card__subtitle">Penalty score per discrepancy type.</p>
             </div>
           </div>
-          <div className="card__body" style={{ paddingTop: 12 }}>
+          <div className="card__body">
             <table className="table weight-table">
+              <colgroup>
+                <col className="weight-col-type" />
+                <col className="weight-col-score" />
+              </colgroup>
               <thead>
                 <tr>
                   <th>Finding type</th>
-                  <th style={{ textAlign: "right" }}>Score</th>
+                  <th className="weight-table__score">Score</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td><code>MISSING_REQUIRED_FIELD</code></td><td style={{ textAlign: "right" }}>+15</td></tr>
-                <tr><td><code>BATCH_MISMATCH</code></td><td style={{ textAlign: "right" }}>+35</td></tr>
-                <tr><td><code>SUPPLIER_NOT_APPROVED</code></td><td style={{ textAlign: "right" }}>+30</td></tr>
-                <tr><td><code>EXPIRY_BELOW_THRESHOLD</code></td><td style={{ textAlign: "right" }}>+20</td></tr>
-                <tr><td><code>MISSING_REQUIRED_TEST</code></td><td style={{ textAlign: "right" }}>+25</td></tr>
-                <tr><td><code>TEST_RESULT_OUT_OF_SPEC</code></td><td style={{ textAlign: "right" }}>+10 / +20 / +30 / +40</td></tr>
-                <tr><td><code>QUANTITY_MISMATCH</code></td><td style={{ textAlign: "right" }}>+15</td></tr>
-                <tr><td><code>LOW_EXTRACTION_CONFIDENCE</code> / <code>UNPARSABLE_DOCUMENT</code></td><td style={{ textAlign: "right" }}>+25</td></tr>
+                <tr>
+                  <td><code>MISSING_REQUIRED_FIELD</code></td>
+                  <td className="weight-table__score">+15</td>
+                </tr>
+                <tr>
+                  <td><code>BATCH_MISMATCH</code></td>
+                  <td className="weight-table__score">+35</td>
+                </tr>
+                <tr>
+                  <td><code>SUPPLIER_NOT_APPROVED</code></td>
+                  <td className="weight-table__score">+30</td>
+                </tr>
+                <tr>
+                  <td><code>EXPIRY_BELOW_THRESHOLD</code></td>
+                  <td className="weight-table__score">+20</td>
+                </tr>
+                <tr>
+                  <td><code>MISSING_REQUIRED_TEST</code></td>
+                  <td className="weight-table__score">+25</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>TEST_RESULT_OUT_OF_SPEC</code>
+                    <div className="weight-table__hint">
+                      Scaled by severity — low / medium / high / critical
+                    </div>
+                  </td>
+                  <td className="weight-table__score">+10 – +40</td>
+                </tr>
+                <tr>
+                  <td><code>QUANTITY_MISMATCH</code></td>
+                  <td className="weight-table__score">+15</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>LOW_EXTRACTION_CONFIDENCE</code>
+                    <div className="weight-table__hint">
+                      or <code>UNPARSABLE_DOCUMENT</code>
+                    </div>
+                  </td>
+                  <td className="weight-table__score">+25</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -278,57 +382,138 @@ export default function SettingsPage() {
       </div>
 
       <div className="card">
-        <div className="card__header">
+        <div className="card__header card__header--divided">
           <div>
-            <h3 className="card__title">How VeriTrace works</h3>
+            <h3 className="card__title">Supported documents and current scope</h3>
             <p className="card__subtitle">
-              Reference for QA reviewers and auditors.
+              What VeriTrace verifies today, and what is on the roadmap.
             </p>
           </div>
         </div>
-        <div className="card__body help">
-          <ol>
-            <li>Extract fields from the COA and material label using Azure Document Intelligence.</li>
-            <li>Compare extracted fields against approved material specs and master data.</li>
-            <li>Generate deterministic findings with severity and score for each discrepancy.</li>
-            <li>Calculate aggregate risk score and decision (APPROVED / NEEDS_REVIEW / REJECTED).</li>
-            <li>Summarize findings via GitHub Models or template fallback — the LLM does not decide the outcome.</li>
-            <li>Save the result to the read-only audit trail with full evidence.</li>
-          </ol>
-        </div>
-      </div>
+        <div className="card__body">
+          <div className="scope-stack">
+            <div className="scope-group">
+              <div className="scope-group__head">
+                <span
+                  className="scope-group__icon scope-group__icon--ok"
+                  aria-hidden="true"
+                >
+                  <span className="material-symbols-outlined">
+                    check_circle
+                  </span>
+                </span>
+                <div>
+                  <div className="scope-group__title">
+                    Supported for verification
+                  </div>
+                  <div className="scope-group__hint">
+                    Analyzed end-to-end and saved to the audit trail.
+                  </div>
+                </div>
+              </div>
+              <ul className="scope-group__list">
+                <li>Certificate of Analysis (COA) — PDF, PNG, JPG</li>
+                <li>Material Label — PDF, PNG, JPG</li>
+              </ul>
+            </div>
 
-      <div className="card">
-        <div className="card__header">
-          <div>
-            <h3 className="card__title">Supported documents and current limitations</h3>
-            <p className="card__subtitle">
-              Honest scope statement for QA reviewers.
-            </p>
+            <div className="scope-group">
+              <div className="scope-group__head">
+                <span
+                  className="scope-group__icon scope-group__icon--neutral"
+                  aria-hidden="true"
+                >
+                  <span className="material-symbols-outlined">
+                    upload_file
+                  </span>
+                </span>
+                <div>
+                  <div className="scope-group__title">
+                    Accepted but not analyzed
+                  </div>
+                  <div className="scope-group__hint">
+                    Accepted in the interface; not analyzed or saved in this MVP.
+                  </div>
+                </div>
+              </div>
+              <ul className="scope-group__list">
+                <li>Delivery notes</li>
+                <li>Packing lists</li>
+                <li>Purchase orders</li>
+                <li>Safety Data Sheets (SDS / MSDS)</li>
+              </ul>
+            </div>
+
+            <div className="scope-group">
+              <div className="scope-group__head">
+                <span
+                  className="scope-group__icon scope-group__icon--info"
+                  aria-hidden="true"
+                >
+                  <span className="material-symbols-outlined">schedule</span>
+                </span>
+                <div>
+                  <div className="scope-group__title">In development</div>
+                  <div className="scope-group__hint">
+                    Planned capabilities, not yet available in this release.
+                  </div>
+                </div>
+              </div>
+              <ul className="scope-group__list">
+                <li>Notifications and alerts</li>
+                <li>Account management and role-based permissions</li>
+                <li>Exportable PDF report</li>
+              </ul>
+            </div>
           </div>
-        </div>
-        <div className="card__body help">
-          <h4>Supported</h4>
-          <ul>
-            <li>Certificate of Analysis (COA) — PDF, PNG, JPG</li>
-            <li>Material Label — PDF, PNG, JPG</li>
-            <li>Sample cases — synthetic verification scenarios</li>
-          </ul>
 
-          <h4>Not yet analyzed (UI-accepted, backend pending)</h4>
-          <ul>
-            <li>Supporting documents (delivery notes, packing lists, purchase orders, SDS, ERP/WMS/LIMS exports)</li>
-            <li>Notifications and alerts <span className="dev-badge dev-badge--neutral">In development</span></li>
-            <li>Account management and role-based permissions <span className="dev-badge dev-badge--neutral">In development</span></li>
-            <li>Exportable PDF report <span className="dev-badge dev-badge--neutral">In development</span></li>
-          </ul>
+          <div className="scope-note" role="note">
+            <span className="material-symbols-outlined" aria-hidden="true">
+              info
+            </span>
+            <div>
+              Complete verification currently requires one COA and one Material
+              Label. Supporting documents are not analyzed or saved in this MVP.
+            </div>
+          </div>
 
-          <h4>Current limitations</h4>
-          <ul>
-            <li>Scoring matrix is a configurable prototype heuristic; production weights should be calibrated with QA SMEs and historical deviation data.</li>
-            <li>Parser is optimized for the included synthetic COA / label set and may need expansion for broader real-world layouts.</li>
-            <li>Storage is SQLite for the MVP; production deployments should use a managed database.</li>
-          </ul>
+          <details className="toggle-block">
+            <summary className="toggle-block__summary">
+              <svg
+                className="toggle-block__chev"
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="9 6 15 12 9 18" />
+              </svg>
+              Current limitations
+            </summary>
+            <div className="toggle-block__body">
+              <ul>
+                <li>
+                  Scoring weights are calibrated against the included sample
+                  cases. Production deployments should re-tune weights with QA
+                  subject-matter experts and historical deviation data.
+                </li>
+                <li>
+                  The document parser is tuned for the included sample COA and
+                  label formats. Wider real-world layouts may require parser
+                  updates before going live.
+                </li>
+              </ul>
+              <p className="tech-note">
+                Technical note — this MVP stores records in SQLite. Production
+                deployments should run on a managed database.
+              </p>
+            </div>
+          </details>
         </div>
       </div>
     </div>

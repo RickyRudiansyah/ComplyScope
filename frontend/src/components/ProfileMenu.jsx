@@ -43,7 +43,7 @@ export default function ProfileMenu({ onOpenProfile }) {
         <div className="menu-popover" role="menu">
           <div className="menu-popover__head">
             <div className="menu-popover__name">QA Personnel</div>
-            <div className="menu-popover__sub">qa@veritrace.com (placeholder)</div>
+            <div className="menu-popover__sub">qa@veritrace.com</div>
           </div>
           <button
             type="button"

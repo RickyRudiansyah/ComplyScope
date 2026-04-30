@@ -17,9 +17,18 @@ export default function HistoryTable({ logs, selectedId, onSelect }) {
       />
     );
   }
+
   return (
-    <div className="card" style={{ overflow: "hidden" }}>
+    <div className="card history-table-wrap">
       <table className="table table--clickable history-table">
+        <colgroup>
+          <col className="col-when" />
+          <col className="col-analysis" />
+          <col className="col-material" />
+          <col className="col-supplier" />
+          <col className="col-decision" />
+          <col className="col-risk" />
+        </colgroup>
         <thead>
           <tr>
             <th className="col-when">Time</th>
@@ -59,15 +68,16 @@ export default function HistoryTable({ logs, selectedId, onSelect }) {
                     {log.material_code || ""}
                   </div>
                 </td>
-                <td
-                  className="col-supplier"
-                  title={log.supplier || ""}
-                >
+                <td className="col-supplier" title={log.supplier || ""}>
                   <div>{log.supplier || "—"}</div>
                   {log.batch_no ? (
                     <div
                       className="muted"
-                      style={{ fontSize: 11, fontFamily: "var(--font-mono)", marginTop: 2 }}
+                      style={{
+                        fontSize: 11,
+                        fontFamily: "var(--font-mono)",
+                        marginTop: 2,
+                      }}
                     >
                       {log.batch_no}
                     </div>

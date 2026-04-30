@@ -39,9 +39,15 @@ class ApprovedSupplier(BaseModel):
     status: str
 
 
+class MaterialSupplierStatus(BaseModel):
+    supplier_name: str
+    status: str
+
+
 class MaterialDetail(MaterialBase):
     specs: List[MaterialSpec] = Field(default_factory=list)
     approved_suppliers: List[ApprovedSupplier] = Field(default_factory=list)
+    supplier_statuses: List[MaterialSupplierStatus] = Field(default_factory=list)
 
 
 class Supplier(BaseModel):

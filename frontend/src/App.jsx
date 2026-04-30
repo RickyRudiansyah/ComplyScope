@@ -24,7 +24,7 @@ const PAGE_META = {
     label: "Verify",
     title: "Material Verification",
     subtitle:
-      "Submit a Certificate of Analysis and Material Label to run an automated verification record.",
+      "Submit a Certificate of Analysis (COA)and Material Label to run an automated verification record.",
     icon: "fact_check",
   },
   history: {

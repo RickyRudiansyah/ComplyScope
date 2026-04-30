@@ -17,6 +17,23 @@ body {
 img, svg { display: block; max-width: 100%; }
 button { cursor: pointer; background: none; border: none; font-family: inherit; }
 input, select, textarea { font-family: inherit; }
+.text-block-preserve-lines { white-space: pre-wrap; }
+.section-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  color: var(--c-outline);
+}
+.body-copy-sm {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.body-copy-md {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--c-text-soft);
+}
 a { color: inherit; text-decoration: none; }
 table { border-collapse: collapse; width: 100%; }
 
@@ -576,6 +593,13 @@ table { border-collapse: collapse; width: 100%; }
 .card__title { font-size: 18px; line-height: 26px; font-weight: 600; color: var(--c-text); }
 .card__subtitle { font-size: 13px; color: var(--c-text-soft); margin-top: 4px; }
 .card__body { padding: 18px 20px 20px; }
+/* Optional bottom rule under the header — used in settings cards for stronger
+   hierarchy between title/description and the main content. */
+.card__header--divided {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--c-outline-variant);
+}
+.card__header--divided + .card__body { padding-top: 18px; }
 .card__footer {
   padding: 12px 20px 14px;
   border-top: 1px solid var(--c-outline-variant);
@@ -849,6 +873,32 @@ table { border-collapse: collapse; width: 100%; }
   font-size: 12px;
   color: var(--c-outline);
 }
+/* .filter-bar__select-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.filter-bar__select-label {
+  color: var(--text-muted);
+  font-weight: 300;
+  size: 11px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.filter-bar__select--with-label {
+  border: 0;
+  padding: 0;
+  height: auto;
+  background: transparent;
+  min-width: 90px;
+} */
 
 /* ───── Tables ───── */
 .table {
@@ -878,11 +928,61 @@ table { border-collapse: collapse; width: 100%; }
 .table--clickable tbody tr:hover { background: var(--c-surface-container-low); }
 .table--clickable tbody tr.is-selected { background: var(--c-surface-container); }
 
-/* History columns */
-.history-table .col-when { white-space: nowrap; font-size: 12px; color: var(--c-text-soft); width: 160px; }
-.history-table .col-analysis { width: 220px; }
-.history-table .col-decision { width: 140px; }
-.history-table .col-risk { width: 140px; }
+/* ── History table — fixed layout driven by <colgroup> ──
+   The wrapper is a container so column widths react to the table's actual
+   available width — the same rules cover all three layout states (full-width,
+   detail-panel open, sidebar open). */
+.history-table-wrap {
+  overflow: hidden;
+  container-type: inline-size;
+  container-name: histtbl;
+}
+.history-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+/* Proportional column widths summing to 100%. With table-layout: fixed the
+   browser scales every column uniformly when the container resizes, so the
+   visual gap rhythm between columns is identical in all three layout states
+   (full-width, detail panel open, sidebar open). No column is left as `auto`,
+   which would otherwise let one column hoard leftover space and break the
+   even spacing. Cell padding stays a uniform 16px throughout. */
+.history-table col.col-when     { width: 14%; }
+.history-table col.col-analysis { width: 19.5%; }
+.history-table col.col-material { width: 15.5%; }
+.history-table col.col-supplier { width: 20%; }
+.history-table col.col-decision { width: 14%; }
+.history-table col.col-risk     { width: 12%; }
+
+/* Compact rebalance — when the table is squeezed (detail panel + sidebar
+   open, or small viewports), shift a little weight toward Time and the
+   badge columns so they stay readable, and allow Time to wrap if needed. */
+@container histtbl (max-width: 820px) {
+  .history-table col.col-when     { width: 20%; }
+  .history-table col.col-analysis { width: 26%; }
+  .history-table col.col-material { width: 16.5%; }
+  .history-table col.col-supplier { width: 15.5%; }
+  .history-table col.col-decision { width: 17.5%; }
+  .history-table col.col-risk     { width: 13.5%; }
+  .history-table .col-when { white-space: normal; }
+}
+
+/* Cell-level styling (typography, wrapping). Widths live on the <col>s. */
+.history-table .col-when {
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--c-text-soft);
+}
+.history-table .col-decision,
+.history-table .col-risk { white-space: nowrap; }
+.history-table .col-material,
+.history-table .col-supplier { line-height: 1.4; }
+.history-table .col-material > div:first-child,
+.history-table .col-supplier > div:first-child {
+  overflow-wrap: anywhere;
+}
+
 .analysis-cell {
   display: flex;
   flex-direction: column;
@@ -958,16 +1058,22 @@ table { border-collapse: collapse; width: 100%; }
 }
 @media (min-width: 1100px) {
   .history-grid { grid-template-columns: minmax(0, 1fr) 320px; }
+  .history-grid--full { grid-template-columns: 1fr; }
+  .app--nav-open .history-grid { grid-template-columns: minmax(0, 1fr) 280px; }
+  .app--nav-open .history-grid--full { grid-template-columns: 1fr; }
 }
 .history-detail-side {
   background: var(--c-surface-container-lowest);
   border: 1px solid var(--c-outline-variant);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+  align-self: start;
+  height: fit-content;
   padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding-bottom: 30px
 }
 .history-detail-side h4 {
   font-size: 11px;
@@ -1020,80 +1126,149 @@ table { border-collapse: collapse; width: 100%; }
 /* ───── Decision banner (verify result) ───── */
 .decision {
   display: grid;
-  grid-template-columns: minmax(160px, max-content) minmax(0, 1fr);
+  grid-template-columns: minmax(210px, 0.95fr) minmax(240px, 1fr) minmax(240px, 1fr);
   align-items: start;
-  gap: 24px;
-  padding: 24px;
+  gap: 0;
+  padding: 18px 20px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--c-outline-variant);
   border-left-width: 3px;
   box-shadow: var(--shadow-sm);
   background: var(--c-surface-container-lowest);
 }
-@media (max-width: 768px) { .decision { grid-template-columns: 1fr; } }
+@media (max-width: 1024px) {
+  .decision { grid-template-columns: 1fr; }
+}
 .decision--approved { border-left-color: var(--c-ok); background: var(--c-ok-bg); }
 .decision--review { border-left-color: var(--c-warn); background: var(--c-warn-bg); }
 .decision--rejected { border-left-color: var(--c-bad); background: var(--c-bad-bg); }
-.decision__main {
+.decision__section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
+  min-width: 0;
+  padding: 4px 18px;
+}
+.decision__section + .decision__section {
+  border-left: 1px solid color-mix(in srgb, var(--c-outline-variant) 72%, transparent);
+}
+.decision__section--primary {
+  padding-left: 0;
+  padding-right: 20px;
+  gap: 10px;
+}
+.decision__section--audit {
+  padding-right: 0;
+}
+.decision__badge-wrap {
+  display: flex;
   align-items: flex-start;
-  min-width: 160px;
+  margin-bottom: 2px;
+}
+.decision__badge-wrap .badge {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
 }
 .decision__score {
-  font-size: 48px;
-  line-height: 1;
+  font-size: 40px;
+  line-height: 0.95;
   font-weight: 700;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   color: var(--c-text);
-  margin: 4px 0 8px;
+  margin: 2px 0 0;
 }
 .decision__score-den {
-  font-size: 22px;
+  font-size: 18px;
   color: var(--c-outline);
-  font-weight: 500;
-  margin-left: 1px;
+  font-weight: 600;
+  margin-left: 2px;
+}
+.decision__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 2px;
+  max-width: 180px;
 }
 .decision__meta-row {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--c-outline);
-}
-.decision__meta-label { font-weight: 500; }
-.decision__meta-value { color: var(--c-text); font-weight: 600; }
-
-.decision__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 32px;
-  row-gap: 8px;
-  align-self: stretch;
+  grid-template-columns: max-content max-content;
+  align-items: baseline;
+  justify-content: start;
+  column-gap: 10px;
+  row-gap: 2px;
+  font-size: 13px;
+  color: var(--c-text-soft);
+  line-height: 1.45;
 }
-.decision__grid-cell { min-width: 0; }
-.decision__grid dt {
+.decision__meta-label {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--c-outline);
 }
-.decision__grid dd {
-  font-size: 13px;
-  font-weight: 500;
+.decision__meta-value {
   color: var(--c-text);
-  font-family: var(--font-mono);
-  margin-top: 2px;
+  font-weight: 600;
+  text-align: left;
+}
+.decision__section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-outline);
+}
+.decision__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.decision__list-row {
+  display: grid;
+  grid-template-columns: minmax(88px, 108px) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.decision__list dt {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-outline);
+}
+.decision__list dd {
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: var(--c-text);
   word-break: break-word;
 }
-.decision__hint {
-  grid-column: 1 / -1;
-  font-size: 12px;
-  color: var(--c-outline);
-  margin-top: 4px;
+@media (max-width: 1024px) {
+  .decision__section {
+    padding: 4px 0 16px;
+  }
+  .decision__section + .decision__section {
+    border-left: 0;
+    border-top: 1px solid color-mix(in srgb, var(--c-outline-variant) 72%, transparent);
+    padding-top: 16px;
+  }
+}
+@media (max-width: 640px) {
+  .decision__list-row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .decision__meta-row {
+    align-items: start;
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
 }
 
 /* ───── Result tabs ───── */
@@ -1104,9 +1279,10 @@ table { border-collapse: collapse; width: 100%; }
   flex-wrap: wrap;
 }
 .result-tabs__btn {
-  padding: 10px 18px;
-  font-size: 14px;
-  font-weight: 500;
+  padding: 11px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   color: var(--c-outline);
   border-bottom: 2px solid transparent;
   transition: color var(--t-fast), border-color var(--t-fast);
@@ -1150,7 +1326,13 @@ table { border-collapse: collapse; width: 100%; }
 .finding--low { border-left: 3px solid var(--c-ok); }
 .finding__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .finding__type { font-size: 14px; font-weight: 600; color: var(--c-text); }
-.finding__code { font-family: var(--font-mono); font-size: 11px; color: var(--c-outline); margin-top: 4px; }
+.finding__code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-text-soft);
+  margin-top: 4px;
+}
 .finding__msg { font-size: 13px; color: var(--c-text-soft); margin-top: 6px; line-height: 1.5; }
 .finding__evidence {
   margin-top: 12px;
@@ -1166,13 +1348,14 @@ table { border-collapse: collapse; width: 100%; }
   row-gap: 4px;
   font-size: 12px;
 }
-.finding__evidence dt { color: var(--c-outline); font-weight: 500; }
+.finding__evidence dt { color: var(--c-text-soft); font-weight: 500; }
 .finding__evidence dd { color: var(--c-text); font-family: var(--font-mono); }
 .risk-breakdown {
   background: var(--c-surface-container);
   border-radius: var(--radius-sm);
   padding: 10px 12px;
-  font-size: 12px;
+  font-size: 13px;
+  /* font-weight: 600; */
   color: var(--c-text-soft);
   font-family: var(--font-mono);
 }
@@ -1197,6 +1380,7 @@ table { border-collapse: collapse; width: 100%; }
   display: grid;
   grid-template-columns: 1fr;
   gap: 24px;
+  align-items: start;
 }
 @media (min-width: 1024px) {
   .verify-grid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
@@ -1235,7 +1419,7 @@ table { border-collapse: collapse; width: 100%; }
   margin: 0;
 }
 .upload-drop__hint {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--c-text-soft);
   margin: 0;
 }
@@ -1274,7 +1458,7 @@ table { border-collapse: collapse; width: 100%; }
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--c-secondary);
   margin-top: 2px;
 }
@@ -1317,6 +1501,7 @@ table { border-collapse: collapse; width: 100%; }
   flex-wrap: wrap;
   margin-top: 16px;
   padding-top: 16px;
+  padding-bottom: 12px;
   border-top: 1px solid var(--c-outline-variant);
 }
 .upload-actions__status {
@@ -1617,14 +1802,22 @@ table { border-collapse: collapse; width: 100%; }
 @media (max-width: 768px) { .pipeline__line { display: none; } }
 
 .settings-intro {
-  margin: 0 0 14px;
+  margin: 0 0 16px;
   font-size: 13px;
   color: var(--c-text-soft);
   line-height: 1.55;
 }
 
+/* Subtle horizontal rule used inside settings cards to separate the score
+   bands from the transparency note. Calmer than a full callout border. */
+.settings-divider {
+  border: 0;
+  border-top: 1px solid var(--c-outline-variant);
+  margin: 20px 0 16px;
+}
+
 /* Risk scoring bands — coloured row layout per Claude Design */
-.score-bands { display: flex; flex-direction: column; gap: 8px; }
+.score-bands { display: flex; flex-direction: column; gap: 10px; }
 .score-band {
   display: flex;
   align-items: center;
@@ -1698,7 +1891,216 @@ table { border-collapse: collapse; width: 100%; }
   margin: 0;
 }
 
-.weight-table td:last-child { font-family: var(--font-mono); font-weight: 700; color: var(--c-bad); }
+/* Finding weights table — fixed layout so the score column stays compact and
+   never wraps, regardless of the finding-type label length. */
+.weight-table { table-layout: fixed; width: 100%; }
+.weight-table col.weight-col-type  { width: auto; }
+.weight-table col.weight-col-score { width: 116px; }
+.weight-table th,
+.weight-table td { padding: 12px 16px; vertical-align: middle; }
+.weight-table tbody td { line-height: 1.5; }
+.weight-table tbody td code { font-size: 12px; }
+.weight-table th.weight-table__score,
+.weight-table td.weight-table__score {
+  text-align: right;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.weight-table thead th.weight-table__score { font-weight: 700; color: var(--c-outline); }
+.weight-table tbody td.weight-table__score { font-weight: 700; color: var(--c-bad); }
+/* "How VeriTrace works" — 6-step responsive grid. Each tile = icon + step
+   number + short title + one-sentence description. Calmer than a numbered
+   prose list and easier to scan. */
+.work-flow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 720px) {
+  .work-flow { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+}
+@media (min-width: 1024px) {
+  .work-flow { grid-template-columns: repeat(3, 1fr); }
+}
+.work-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border: 1px solid var(--c-outline-variant);
+  border-radius: var(--radius-md);
+  background: var(--c-surface-container-lowest);
+}
+.work-step__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  background: var(--c-surface-container);
+  color: var(--c-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.work-step__icon .material-symbols-outlined { font-size: 20px; }
+.work-step__main { min-width: 0; flex: 1; }
+.work-step__num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--c-outline);
+  letter-spacing: 0.08em;
+}
+.work-step__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-text);
+  margin-top: 2px;
+}
+.work-step__desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--c-text-soft);
+  margin-top: 4px;
+}
+
+/* "Supported documents and current scope" — three structured groups. */
+.scope-stack { display: flex; flex-direction: column; gap: 12px; }
+.scope-group {
+  border: 1px solid var(--c-outline-variant);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  background: var(--c-surface-container-lowest);
+}
+.scope-group__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.scope-group__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.scope-group__icon .material-symbols-outlined { font-size: 18px; }
+.scope-group__icon--ok { background: var(--c-ok-bg); color: var(--c-ok); }
+.scope-group__icon--neutral { background: var(--c-surface-container); color: var(--c-text-soft); }
+.scope-group__icon--info { background: var(--c-info-bg); color: var(--c-info); }
+.scope-group__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-text);
+}
+.scope-group__hint {
+  font-size: 11px;
+  color: var(--c-outline);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+.scope-group__list {
+  margin: 0;
+  padding-left: 38px;
+  list-style: none;
+}
+.scope-group__list li {
+  font-size: 13px;
+  color: var(--c-text-soft);
+  line-height: 1.5;
+  padding: 3px 0;
+  position: relative;
+}
+.scope-group__list li::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 11px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--c-outline-variant);
+}
+
+.scope-note {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--c-info-bg);
+  border: 1px solid var(--c-info-border);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--c-text);
+}
+.scope-note .material-symbols-outlined {
+  color: var(--c-info);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* Generic collapsible block for tertiary content tucked under a primary
+   section (used by "View step details" under the pipeline, "Current
+   limitations" under the scope card, etc.). Visually secondary by design. */
+.toggle-block {
+  margin-top: 18px;
+  border-top: 1px solid var(--c-outline-variant);
+  padding-top: 14px;
+}
+.toggle-block__summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--c-outline);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  user-select: none;
+}
+.toggle-block__summary::-webkit-details-marker { display: none; }
+.toggle-block__chev {
+  transition: transform var(--t-fast);
+  color: var(--c-outline);
+}
+.toggle-block[open] .toggle-block__chev { transform: rotate(90deg); }
+.toggle-block__body {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--c-text-soft);
+  line-height: 1.55;
+}
+.toggle-block__body ul {
+  margin: 0;
+  padding-left: 18px;
+  list-style: disc;
+}
+.toggle-block__body li { margin-top: 4px; }
+
+/* Small dashed-bordered footnote for technical asides inside a toggle-block. */
+.tech-note {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--c-outline-variant);
+  font-size: 11px;
+  color: var(--c-outline);
+  line-height: 1.5;
+}
+
+.weight-table__hint {
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--c-outline);
+}
+.weight-table__hint code { font-size: 11px; color: var(--c-text-soft); }
 
 /* Section heading (help cards) */
 .section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
@@ -1809,6 +2211,15 @@ table { border-collapse: collapse; width: 100%; }
 .drawer__body h4 { font-size: 12px; font-weight: 700; color: var(--c-text); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 12px; }
 .drawer__body p { margin-top: 6px; font-size: 13px; }
 .drawer__body ul { margin-left: 20px; margin-top: 6px; }
+.drawer__note {
+  margin-top: 18px;
+  padding: 10px 12px;
+  border-left: 2px solid var(--c-outline-variant);
+  background: var(--c-surface-container);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--c-text-soft);
+}
 
 /* Score range chips for Settings */
 .score-chips { display: flex; flex-direction: column; gap: 8px; }

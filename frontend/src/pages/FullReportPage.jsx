@@ -29,7 +29,7 @@ export default function FullReportPage({ analysisId, onBack }) {
     return (
       <div className="card">
         <div className="card__body">
-          <Spinner label="Loading full report…" />
+          <Spinner label="Loading full report..." />
         </div>
       </div>
     );
@@ -52,7 +52,16 @@ export default function FullReportPage({ analysisId, onBack }) {
     <div className="stack">
       <div className="row row--between" style={{ flexWrap: "wrap", gap: 10 }}>
         <button type="button" className="btn" onClick={onBack}>
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="19" y1="12" x2="5" y2="12" />
             <polyline points="12 19 5 12 12 5" />
           </svg>
@@ -60,7 +69,10 @@ export default function FullReportPage({ analysisId, onBack }) {
         </button>
         <div className="row" style={{ gap: 8 }}>
           <StatusBadge value={detail.decision} kind="decision" />
-          <span className="muted" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>
+          <span
+            className="muted"
+            style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}
+          >
             {detail.analysis_id}
           </span>
         </div>
@@ -70,7 +82,16 @@ export default function FullReportPage({ analysisId, onBack }) {
 
       <div className="readonly-banner">
         <div className="readonly-banner__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M12 3l8 4v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4z" />
             <path d="M9 12l2 2 4-4" />
           </svg>

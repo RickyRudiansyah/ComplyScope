@@ -22,11 +22,11 @@ function describeSpec(spec) {
     case "min":
       return `>= ${spec.spec_min} ${spec.unit || ""}`.trim();
     case "text_equals":
-      return spec.expected_text ?? "—";
+      return spec.expected_text ?? "-";
     case "positive":
       return "Positive / conforms";
     default:
-      return spec.spec_type || "—";
+      return spec.spec_type || "-";
   }
 }
 
@@ -46,8 +46,6 @@ export default function MasterDataPage() {
   const [suppliersErr, setSuppliersErr] = useState(null);
   const [suppliersLoading, setSuppliersLoading] = useState(true);
 
-  // Fetched material details cache so the Specifications and Supplier Status
-  // tabs can render aggregated tables without extra clicks.
   const [allDetails, setAllDetails] = useState({});
 
   useEffect(() => {
@@ -70,8 +68,6 @@ export default function MasterDataPage() {
     };
   }, []);
 
-  // Fetch each material's full detail so the cross-tabs (Specifications, Supplier Status)
-  // can render aggregated tables. Uses existing /api/materials/:code endpoint.
   useEffect(() => {
     if (!materials || materials.length === 0) return;
     let cancelled = false;
@@ -111,6 +107,9 @@ export default function MasterDataPage() {
     };
   }, [selectedCode]);
 
+  const detailsLoaded =
+    materials.length > 0 && Object.keys(allDetails).length === materials.length;
+
   const allSpecRows = useMemo(() => {
     const out = [];
     for (const m of materials) {
@@ -131,8 +130,8 @@ export default function MasterDataPage() {
     const out = [];
     for (const m of materials) {
       const d = allDetails[m.material_code];
-      if (!d?.approved_suppliers) continue;
-      for (const s of d.approved_suppliers) {
+      if (!d?.supplier_statuses) continue;
+      for (const s of d.supplier_statuses) {
         out.push({
           supplier_name: s.supplier_name,
           status: s.status,
@@ -149,7 +148,16 @@ export default function MasterDataPage() {
     <div className="stack">
       <div className="readonly-banner" role="note">
         <div className="readonly-banner__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <circle cx="12" cy="12" r="9" />
             <line x1="12" y1="8" x2="12" y2="12" />
             <line x1="12" y1="16" x2="12" y2="16.01" />
@@ -185,7 +193,7 @@ export default function MasterDataPage() {
           {materialsErr ? (
             <div className="banner banner--error">{materialsErr}</div>
           ) : materialsLoading ? (
-            <Spinner label="Loading master data…" />
+            <Spinner label="Loading master data..." />
           ) : (
             <>
               {tab === "materials" ? (
@@ -197,7 +205,16 @@ export default function MasterDataPage() {
                       onClick={() => setSelectedCode(null)}
                       style={{ alignSelf: "flex-start" }}
                     >
-                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="14"
+                        height="14"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <line x1="19" y1="12" x2="5" y2="12" />
                         <polyline points="12 19 5 12 12 5" />
                       </svg>
@@ -215,7 +232,7 @@ export default function MasterDataPage() {
                   <div className="material-card-grid">
                     {materials.map((m) => {
                       const d = allDetails[m.material_code];
-                      const supplierCount = d?.approved_suppliers?.length;
+                      const supplierCount = d?.supplier_statuses?.length;
                       return (
                         <div
                           key={m.material_code}
@@ -235,20 +252,29 @@ export default function MasterDataPage() {
                               {m.material_code}
                             </div>
                             <span className="badge badge--info">
-                              {m.category || "—"}
+                              {m.category || "-"}
                             </span>
                           </div>
                           <div className="material-card__name">
                             {m.material_name}
                           </div>
                           <div className="material-card__foot">
-                            <span className="muted">Approved suppliers</span>
+                            <span className="muted">Supplier records</span>
                             <span className="material-card__foot-count">
-                              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <svg
+                                viewBox="0 0 24 24"
+                                width="14"
+                                height="14"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
                                 <circle cx="12" cy="12" r="9" />
                                 <path d="M9 12l2 2 4-4" />
                               </svg>
-                              {supplierCount ?? "—"}
+                              {supplierCount ?? "-"}
                             </span>
                           </div>
                         </div>
@@ -259,8 +285,10 @@ export default function MasterDataPage() {
               ) : null}
 
               {tab === "specifications" ? (
-                allSpecRows.length === 0 ? (
-                  <Spinner label="Loading specifications…" />
+                !detailsLoaded ? (
+                  <Spinner label="Loading specifications..." />
+                ) : allSpecRows.length === 0 ? (
+                  <EmptyState title="No specifications configured" />
                 ) : (
                   <table className="table">
                     <thead>
@@ -277,7 +305,10 @@ export default function MasterDataPage() {
                         <tr key={`${r.material_code}-${r.parameter}-${i}`}>
                           <td>
                             <div style={{ fontWeight: 600 }}>{r.material_name}</div>
-                            <div className="muted" style={{ fontSize: 11, fontFamily: "var(--font-mono)" }}>
+                            <div
+                              className="muted"
+                              style={{ fontSize: 11, fontFamily: "var(--font-mono)" }}
+                            >
                               {r.material_code}
                             </div>
                           </td>
@@ -285,7 +316,7 @@ export default function MasterDataPage() {
                           <td style={{ fontFamily: "var(--font-mono)" }}>
                             {describeSpec(r)}
                           </td>
-                          <td>{r.method || "—"}</td>
+                          <td>{r.method || "-"}</td>
                           <td>
                             <StatusBadge value={r.criticality} kind="severity" />
                           </td>
@@ -298,16 +329,16 @@ export default function MasterDataPage() {
 
               {tab === "suppliers" ? (
                 suppliersLoading ? (
-                  <Spinner label="Loading suppliers…" />
+                  <Spinner label="Loading suppliers..." />
                 ) : suppliersErr ? (
                   <div className="banner banner--error">{suppliersErr}</div>
-                ) : supplierStatusRows.length === 0 ? (
+                ) : suppliers.length === 0 ? (
                   <EmptyState title="No suppliers configured" />
                 ) : (
                   <div className="supplier-card-grid">
-                    {supplierStatusRows.map((r, i) => (
+                    {suppliers.map((r, i) => (
                       <div
-                        key={`${r.material_code}-${r.supplier_name}-${i}`}
+                        key={`${r.supplier_name}-${i}`}
                         className="supplier-card"
                       >
                         <span
@@ -321,10 +352,8 @@ export default function MasterDataPage() {
                             {r.supplier_name}
                           </div>
                           <div className="supplier-card__meta">
-                            {r.material_name} ·{" "}
-                            <span style={{ fontFamily: "var(--font-mono)" }}>
-                              {r.material_code}
-                            </span>
+                            General qualification status from supplier master
+                            data.
                           </div>
                         </div>
                         <StatusBadge value={r.status} kind="supplier" />
@@ -335,8 +364,10 @@ export default function MasterDataPage() {
               ) : null}
 
               {tab === "supplier_status" ? (
-                supplierStatusRows.length === 0 ? (
-                  <Spinner label="Loading supplier status…" />
+                !detailsLoaded ? (
+                  <Spinner label="Loading supplier status..." />
+                ) : supplierStatusRows.length === 0 ? (
+                  <EmptyState title="No supplier status records returned" />
                 ) : (
                   <table className="table">
                     <thead>
@@ -359,14 +390,14 @@ export default function MasterDataPage() {
                           </td>
                           <td>
                             <span className="badge badge--info">
-                              {r.category || "—"}
+                              {r.category || "-"}
                             </span>
                           </td>
                           <td>
                             <StatusBadge value={r.status} kind="supplier" />
                           </td>
                           <td className="muted" style={{ fontSize: 12 }}>
-                            —
+                            -
                           </td>
                         </tr>
                       ))}

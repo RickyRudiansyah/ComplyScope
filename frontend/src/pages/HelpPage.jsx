@@ -101,7 +101,7 @@ export default function HelpPage() {
               discrepancy in a verification record.
             </p>
           </div>
-          <span className="dev-badge">Backend pending</span>
+          {/* <span className="dev-badge">Backend pending</span> */}
         </div>
         <div className="card__body">
           <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
@@ -112,7 +112,7 @@ export default function HelpPage() {
                 </div>
                 <div style={{ fontWeight: 600 }}>VeriTrace Technical Support</div>
                 <div className="muted" style={{ fontSize: 12.5 }}>
-                  support@veritrace.com (placeholder)
+                  support@veritrace.com
                 </div>
                 <div className="muted" style={{ marginTop: 4, fontSize: 12 }}>
                   Response time: 1 business day
@@ -126,7 +126,7 @@ export default function HelpPage() {
                 </div>
                 <div style={{ fontWeight: 600 }}>Internal IT &amp; QA Helpdesk</div>
                 <div className="muted" style={{ fontSize: 12.5 }}>
-                  helpdesk@pharmasystems.internal (placeholder)
+                  helpdesk@pharmasystems.internal
                 </div>
                 <div className="muted" style={{ marginTop: 4, fontSize: 12 }}>
                   For access, permissions, and account questions

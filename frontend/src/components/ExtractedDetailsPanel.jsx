@@ -1,7 +1,7 @@
 import FieldComparisonTable from "./FieldComparisonTable.jsx";
 import StatusBadge from "./StatusBadge.jsx";
 
-function fmt(value, fallback = "—") {
+function fmt(value, fallback = "-") {
   return value === null || value === undefined || value === "" ? fallback : value;
 }
 
@@ -9,7 +9,7 @@ function statusBadgeFor(value) {
   const s = String(value || "").toUpperCase();
   if (s === "PASS") return <StatusBadge value="PASS" kind="ok" />;
   if (s === "FAIL") return <StatusBadge value="FAIL" kind="bad" />;
-  if (!value) return <span className="muted">—</span>;
+  if (!value) return <span className="muted">-</span>;
   return <StatusBadge value={s} kind="info" />;
 }
 
@@ -118,7 +118,16 @@ export default function ExtractedDetailsPanel({ extracted }) {
           {hasConclusion ? (
             <div className="callout callout--accent" style={{ marginTop: 14 }}>
               <div className="callout__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <circle cx="12" cy="12" r="9" />
                   <line x1="12" y1="8" x2="12" y2="12" />
                   <line x1="12" y1="16" x2="12" y2="16.01" />
@@ -126,7 +135,8 @@ export default function ExtractedDetailsPanel({ extracted }) {
               </div>
               <div>
                 <div className="callout__title">
-                  Source document conclusions are evidence, not the VeriTrace decision
+                  Source document conclusions are evidence, not the VeriTrace
+                  decision
                 </div>
                 <div className="callout__body">
                   Source document conclusions are extracted as evidence.

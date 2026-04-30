@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 
-import EmptyState from "../components/EmptyState.jsx";
 import HistoryTable from "../components/HistoryTable.jsx";
 import Spinner from "../components/Spinner.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
@@ -25,7 +24,7 @@ const SOURCE_LABEL = {
 };
 
 function formatDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleString();
@@ -175,6 +174,23 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
             </option>
           ))}
         </select>
+
+        {/* <div className="filter-bar__select-wrap">
+          <span className="filter-bar__select-label">Source:</span>
+          <select
+            aria-label="Filter by source"
+            className="filter-bar__select filter-bar__select--with-label"
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value)}
+          >
+            {SOURCE_OPTIONS.map((opt) => (
+              <option key={opt.id} value={opt.id}>
+                {opt.label.replace(/^All sources$/, "All")}
+              </option>
+            ))}
+          </select>
+        </div> */}
+
         <select
           aria-label="Filter by decision"
           className="filter-bar__select"
@@ -213,7 +229,11 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
       ) : logsErr ? (
         <div className="banner banner--error">{logsErr}</div>
       ) : (
-        <div className="history-grid">
+        <div
+          className={`history-grid${
+            selectedId ? "" : " history-grid--full"
+          }`}
+        >
           <div className="stack" style={{ gap: 12, minWidth: 0 }}>
             <HistoryTable
               logs={pagedLogs}
@@ -221,9 +241,13 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
               onSelect={setSelectedId}
             />
             {filteredLogs.length > 0 ? (
-              <div className="pagination" role="navigation" aria-label="History pagination">
+              <div
+                className="pagination"
+                role="navigation"
+                aria-label="History pagination"
+              >
                 <span className="pagination__count">
-                  {(safePage - 1) * PAGE_SIZE + 1}–
+                  {(safePage - 1) * PAGE_SIZE + 1}-
                   {Math.min(safePage * PAGE_SIZE, filteredLogs.length)} of{" "}
                   {filteredLogs.length}
                 </span>
@@ -253,14 +277,20 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
           </div>
 
           {selectedId ? (
-            <aside className="history-detail-side" aria-label="Selected verification">
+            <aside
+              className="history-detail-side"
+              aria-label="Selected verification"
+            >
               {detailLoading ? (
-                <Spinner label="Loading verification…" />
+                <Spinner label="Loading verification..." />
               ) : detailErr ? (
                 <div className="banner banner--error">{detailErr}</div>
               ) : detail ? (
                 <>
-                  <div className="row row--between" style={{ alignItems: "flex-start" }}>
+                  <div
+                    className="row row--between"
+                    style={{ alignItems: "flex-start" }}
+                  >
                     <div style={{ minWidth: 0 }}>
                       <div
                         className="muted"
@@ -276,7 +306,7 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
                         <StatusBadge value={detail.decision} kind="decision" />
                       </div>
                       <div style={{ fontWeight: 600, marginTop: 6 }}>
-                        {coa.material_name || selectedRow?.material_name || "—"}
+                        {coa.material_name || selectedRow?.material_name || "-"}
                       </div>
                     </div>
                     <button
@@ -286,7 +316,16 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
                       aria-label="Close detail"
                       title="Close"
                     >
-                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="14"
+                        height="14"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <line x1="18" y1="6" x2="6" y2="18" />
                         <line x1="6" y1="6" x2="18" y2="18" />
                       </svg>
@@ -299,13 +338,13 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
                       <div>
                         <dt>Risk score</dt>
                         <dd>
-                          {detail.risk_score ?? "—"}/100 ·{" "}
-                          {detail.risk_level || "—"}
+                          {detail.risk_score ?? "-"}/100 ·{" "}
+                          {detail.risk_level || "-"}
                         </dd>
                       </div>
                       <div>
                         <dt>Source</dt>
-                        <dd>{SOURCE_LABEL[detail.source] || "—"}</dd>
+                        <dd>{SOURCE_LABEL[detail.source] || "-"}</dd>
                       </div>
                       <div>
                         <dt>Timestamp</dt>
@@ -315,7 +354,11 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
                       </div>
                       <div>
                         <dt>Human review</dt>
-                        <dd>{detail.human_review_required ? "Required" : "Not required"}</dd>
+                        <dd>
+                          {detail.human_review_required
+                            ? "Required"
+                            : "Not required"}
+                        </dd>
                       </div>
                     </dl>
                   </div>
@@ -325,15 +368,15 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
                     <dl>
                       <div>
                         <dt>Supplier</dt>
-                        <dd>{coa.supplier || "—"}</dd>
+                        <dd>{coa.supplier || "-"}</dd>
                       </div>
                       <div>
                         <dt>Batch</dt>
-                        <dd>{coa.batch_no || "—"}</dd>
+                        <dd>{coa.batch_no || "-"}</dd>
                       </div>
                       <div>
                         <dt>Manufacturer</dt>
-                        <dd>{coa.manufacturer || "—"}</dd>
+                        <dd>{coa.manufacturer || "-"}</dd>
                       </div>
                     </dl>
                   </div>
@@ -343,18 +386,36 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
                     {findings.length === 0 ? (
                       <ul>
                         <li>
-                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--c-ok)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="14"
+                            height="14"
+                            fill="none"
+                            stroke="var(--c-ok)"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
                             <circle cx="12" cy="12" r="9" />
                             <path d="M9 12l2 2 4-4" />
                           </svg>
-                          <span>No findings — all checks passed.</span>
+                          <span>No findings - all checks passed.</span>
                         </li>
                       </ul>
                     ) : (
                       <ul>
                         {findings.slice(0, 5).map((f, i) => (
                           <li key={`${f.type}-${i}`}>
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--c-warn)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg
+                              viewBox="0 0 24 24"
+                              width="14"
+                              height="14"
+                              fill="none"
+                              stroke="var(--c-warn)"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
                               <path d="M12 9v4" />
                               <path d="M12 17h.01" />
                               <path d="M10.3 3.86l-8.3 14.4A2 2 0 0 0 3.7 21h16.6a2 2 0 0 0 1.7-2.74L13.7 3.86a2 2 0 0 0-3.4 0z" />
@@ -375,8 +436,8 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
                     <div>
                       <h4>Recommendation</h4>
                       <p
-                        className="muted"
-                        style={{ margin: 0, fontSize: 12, lineHeight: 1.5 }}
+                        className="muted text-block-preserve-lines body-copy-sm"
+                        style={{ margin: 0 }}
                       >
                         {detail.recommendation}
                       </p>
@@ -388,7 +449,16 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
                     className="btn btn--block"
                     onClick={() => onOpenReport?.(detail.analysis_id)}
                   >
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="14"
+                      height="14"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M14 3h7v7" />
                       <path d="M10 14L21 3" />
                       <path d="M21 14v7H3V3h7" />
@@ -398,14 +468,7 @@ export default function HistoryPage({ refreshKey = 0, onOpenReport }) {
                 </>
               ) : null}
             </aside>
-          ) : (
-            <aside className="history-detail-side" aria-label="No selection">
-              <EmptyState
-                title="Select a verification"
-                hint="Choose a record from the table to review decision, risk, findings, and evidence."
-              />
-            </aside>
-          )}
+          ) : null}
         </div>
       )}
     </div>

@@ -19,6 +19,9 @@ const RISK_CLASS = {
 
 const SUPPLIER_CLASS = {
   APPROVED: "badge--ok",
+  CONDITIONAL: "badge--warn",
+  SUSPENDED: "badge--bad",
+  UNDER_REVIEW: "badge--info",
   NOT_APPROVED: "badge--bad",
   PENDING: "badge--warn",
 };
@@ -40,7 +43,7 @@ const DECISION_LABEL = {
 };
 
 export default function StatusBadge({ value, kind = "default", label }) {
-  const safe = value ? String(value).toUpperCase() : "—";
+  const safe = value ? String(value).toUpperCase().replace(/\s+/g, "_") : "-";
   let cls = "badge";
   let display = label;
 
